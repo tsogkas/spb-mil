@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PS2____post_process</title>
+  <meta name="keywords" content="PS2____post_process">
+  <meta name="description" content="[blob_feats,ridge_feats,edge_feats,contours,component_strings] = PS2___post_process(maxima_points,imsize,settings_tokens)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PS2____post_process.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PS2____post_process
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[blob_feats,ridge_feats,edge_feats,contours,component_strings] = PS2___post_process(maxima_points,imsize,settings_tokens)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [blob_feats,ridge_feats,edge_feats,contours,conn_components] = PS2___post_process(maxima_points,imsize,settings_tokens); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [blob_feats,ridge_feats,edge_feats,contours,component_strings] = PS2___post_process(maxima_points,imsize,settings_tokens)
+
+ Extracts tokens from the primal sketch maxima by coverting curves into straight
+ line segments and then discarding non-salient tokens.
+ 
+ INPUTS:
+    maxima_points: set of points provided by PS1____scale_space_sketch
+    imsize: size of input image
+    settings_tokens:  setting structure for token extraction (thresholds, etc.)
+ OUTPUTS:
+   {ridge,edge,blob}_feats: structures containing coordinates and
+              attributes (scale, orientation, etc) of primal sketch tokens
+   contours: cell array containing locations of ridge/edge maxima points
+   conn_components: connected components of ridge and edge contours
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS2z1__choose_tokens.html" class="code" title="function inp_points = PS2z1_choose_points(inp_points,rel);">PS2z1__choose_tokens</a>	inp_points = PS2z1_choose_points(inp_points,rel)</li><li><a href="PS2z2__discard_overlapping.html" class="code" title="function  res=  PSPz2_discard_overlapping(input_points,threshold);">PS2z2__discard_overlapping</a>	res=  PSPz3_discard_overlapping(input_points,threshold)</li><li><a href="PSL____line_tokens.html" class="code" title="function [line_features,contours,components] = PSL____line_tokens(points,imsize,thresh_line_ener);">PSL____line_tokens</a>	[line_features,contour,components] = PSL____line_tokens(edge_points,imsize,thresh_line_ener)</li><li><a href="PSL____point_tokens.html" class="code" title="function  [points] =point_features(points_kept,imsize);">PSL____point_tokens</a>	[points] =point_features(points_kept,imsize)</li><li><a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS00___primal_sketch.html" class="code" title="function [ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests);">PS00___primal_sketch</a>	[ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [blob_feats,ridge_feats,edge_feats,contours,conn_components] = PS2___post_process(maxima_points,imsize,settings_tokens);</a>
+0002 <span class="comment">% [blob_feats,ridge_feats,edge_feats,contours,component_strings] = PS2___post_process(maxima_points,imsize,settings_tokens)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Extracts tokens from the primal sketch maxima by coverting curves into straight</span>
+0005 <span class="comment">% line segments and then discarding non-salient tokens.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% INPUTS:</span>
+0008 <span class="comment">%    maxima_points: set of points provided by PS1____scale_space_sketch</span>
+0009 <span class="comment">%    imsize: size of input image</span>
+0010 <span class="comment">%    settings_tokens:  setting structure for token extraction (thresholds, etc.)</span>
+0011 <span class="comment">% OUTPUTS:</span>
+0012 <span class="comment">%   {ridge,edge,blob}_feats: structures containing coordinates and</span>
+0013 <span class="comment">%              attributes (scale, orientation, etc) of primal sketch tokens</span>
+0014 <span class="comment">%   contours: cell array containing locations of ridge/edge maxima points</span>
+0015 <span class="comment">%   conn_components: connected components of ridge and edge contours</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0018 <span class="comment">% 10/10/2007</span>
+0019 
+0020 structure  = settings_tokens; <a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>;
+0021 
+0022 <span class="comment">%%------------------------------------------------------------------------</span>
+0023 <span class="comment">%% Get straight edge/ridge line tokens, skeletons, and blobs</span>
+0024 <span class="comment">%%------------------------------------------------------------------------</span>
+0025 [ridge_feats,contours{1},conn_components{1}] = <a href="PSL____line_tokens.html" class="code" title="function [line_features,contours,components] = PSL____line_tokens(points,imsize,thresh_line_ener);">PSL____line_tokens</a>(maxima_points{1},imsize,thresh_line_ener);
+0026 [edge_feats, contours{2},conn_components{2}] = <a href="PSL____line_tokens.html" class="code" title="function [line_features,contours,components] = PSL____line_tokens(points,imsize,thresh_line_ener);">PSL____line_tokens</a>(maxima_points{2},imsize,thresh_line_ener);
+0027 blob_feats  = <a href="PSL____point_tokens.html" class="code" title="function  [points] =point_features(points_kept,imsize);">PSL____point_tokens</a>(maxima_points{3},imsize);
+0028 
+0029 <span class="comment">%%------------------------------------------------------------------------</span>
+0030 <span class="comment">%% Apply thresholds to pick a subset of the tokens</span>
+0031 <span class="comment">%%------------------------------------------------------------------------</span>
+0032 ridge_feats = <a href="PS2z1__choose_tokens.html" class="code" title="function inp_points = PS2z1_choose_points(inp_points,rel);">PS2z1__choose_tokens</a>(ridge_feats,{ener_ridge,merit_ridge});
+0033 edge_feats  = <a href="PS2z1__choose_tokens.html" class="code" title="function inp_points = PS2z1_choose_points(inp_points,rel);">PS2z1__choose_tokens</a>(edge_feats,{ener_edge,merit_edge});
+0034 blob_feats  = <a href="PS2z1__choose_tokens.html" class="code" title="function inp_points = PS2z1_choose_points(inp_points,rel);">PS2z1__choose_tokens</a>(blob_feats,{ener_blob,curv_up,curv_down,scale_cond});
+0035 blob_feats  = <a href="PS2z2__discard_overlapping.html" class="code" title="function  res=  PSPz2_discard_overlapping(input_points,threshold);">PS2z2__discard_overlapping</a>(blob_feats,threshold_overlapping);
+0036 
+0037</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

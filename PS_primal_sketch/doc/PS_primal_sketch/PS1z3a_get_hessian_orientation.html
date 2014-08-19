@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PS1z3a_get_hessian_orientation</title>
+  <meta name="keywords" content="PS1z3a_get_hessian_orientation">
+  <meta name="description" content="[cos_hessian,sin_hessian,L_pp,L_qq]   = PS1z3a_get_hessian_orientation(d_xx,d_yy,d_xy)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PS1z3a_get_hessian_orientation.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PS1z3a_get_hessian_orientation
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[cos_hessian,sin_hessian,L_pp,L_qq]   = PS1z3a_get_hessian_orientation(d_xx,d_yy,d_xy)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [cos_hessian,sin_hessian,L_pp,L_qq]   = PS1z3a_get_hessian_orientation(d_xx,d_yy,d_xy); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [cos_hessian,sin_hessian,L_pp,L_qq]   = PS1z3a_get_hessian_orientation(d_xx,d_yy,d_xy)
+
+ Calculate eigenvalues and eigenvectors of the image hessian for orientation estimation.
+ The eigenvector corresponding to the maximal eigenvalue gives the orientation 
+ along which dark features (valleys) lie. Ridges lie along the perpendicular
+ orientation.
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS1z3__get_feature_strength.html" class="code" title="function [feat_strength_selection,feat_saliency,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch);">PS1z3__get_feature_strength</a>	[feat_strength_selection,feat_saliency,sc_min,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch)</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function submolic_verify();</a></li></ul>
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [cos_hessian,sin_hessian,L_pp,L_qq]   = PS1z3a_get_hessian_orientation(d_xx,d_yy,d_xy);</a>
+0002 <span class="comment">% [cos_hessian,sin_hessian,L_pp,L_qq]   = PS1z3a_get_hessian_orientation(d_xx,d_yy,d_xy)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Calculate eigenvalues and eigenvectors of the image hessian for orientation estimation.</span>
+0005 <span class="comment">% The eigenvector corresponding to the maximal eigenvalue gives the orientation</span>
+0006 <span class="comment">% along which dark features (valleys) lie. Ridges lie along the perpendicular</span>
+0007 <span class="comment">% orientation.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0010 <span class="comment">% 10/10/2007</span>
+0011 
+0012 sq_common_term = sqrt(<a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(d_xx - d_yy) + 4*<a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(d_xy));
+0013 <span class="comment">%% eigenvalues</span>
+0014 L_pp = 1/2*(d_xx + d_yy - sq_common_term);
+0015 L_qq = 1/2*(d_xx + d_yy + sq_common_term);
+0016 
+0017 <span class="comment">%% First eigenvector (corresponding to L_pp):</span>
+0018 coeff_1 =  -(1/2*d_yy-1/2*d_xx) + 1/2*sq_common_term;           
+0019 coeff_2 = d_xy;
+0020 ener =  max(sqrt(<a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(coeff_1) + <a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(coeff_2)),eps);
+0021 nener = ener==eps; 
+0022 
+0023 <span class="comment">%% for the special case where `ener' is too low, instead of</span>
+0024 <span class="comment">%% normalizing the eignevector elements, set them to  [1,0]</span>
+0025 
+0026 cos_hessian = (coeff_1./ener).*(1-nener) + nener.*1;
+0027 sin_hessian = (coeff_2./ener).*(1-nener) + nener.*0;
+0028 
+0029 <a name="_sub1" href="#_subfunctions" class="code">function submolic_verify();</a>
+0030 <span class="comment">%% symbolic toolbox code for a quick  verification</span>
+0031 a_11= sym(<span class="string">'d_xx'</span>); a_12  = sym(<span class="string">'d_xy'</span>); a_21= a_12; a_22 = sym(<span class="string">'d_yy'</span>);
+0032 [vec,val] = eig([a_11,a_12;a_21,a_22]);
+0033 vec, val</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

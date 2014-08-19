@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PSLz1a_isolate_same_location</title>
+  <meta name="keywords" content="PSLz1a_isolate_same_location">
+  <meta name="description" content="points_kept = PSLz1a_isolate_same_location(points,size_m)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PSLz1a_isolate_same_location.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PSLz1a_isolate_same_location
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>points_kept = PSLz1a_isolate_same_location(points,size_m)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function points_kept = PSLz1a_isolate_same_location(points,size_m); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> points_kept = PSLz1a_isolate_same_location(points,size_m)
+
+ Removes edge/ridge points lying on identical image locations 
+ (happens due to different structures residing at different locations).
+ Simple remedy: keep only the strongest edge point.
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../PS_primal_sketch/misc/keep_points.html" class="code" title="function res = keep_points(inp,keep,mode);">keep_points</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSLz1__preprocess_points.html" class="code" title="function [points,contours]   = PSLz1__preprocess_points(points,imsize);">PSLz1__preprocess_points</a>	[points,contours]   = PSLz1__preprocess_points(points,imsize)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function points_kept = PSLz1a_isolate_same_location(points,size_m);</a>
+0002 <span class="comment">% points_kept = PSLz1a_isolate_same_location(points,size_m)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Removes edge/ridge points lying on identical image locations</span>
+0005 <span class="comment">% (happens due to different structures residing at different locations).</span>
+0006 <span class="comment">% Simple remedy: keep only the strongest edge point.</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0009 <span class="comment">% 10/10/2007</span>
+0010 
+0011 ener = points.ener;
+0012 indexes = points.indexes;
+0013 <span class="comment">%%-------------------------------------------------------------------------</span>
+0014 <span class="comment">%% identify edge points at identical locations</span>
+0015 <span class="comment">%%-------------------------------------------------------------------------</span>
+0016 [srt,ind] = sort(indexes); 
+0017 <span class="comment">% identical points should form blocks of indexes with identical value</span>
+0018 <span class="comment">% start of identical: previous is not the same  but next is identical.</span>
+0019 wt_start =  find((srt(2:end-1) ==srt(3:end)).*(srt(1:end-2)~=srt(2:end-1)))+1;
+0020 <span class="comment">% end of identical: previous is the same but next is not the same</span>
+0021 wt_end   = find((srt(2:end-1) ~=srt(3:end)).*(srt(1:end-2)==srt(2:end-1)))+1;
+0022 
+0023 <span class="keyword">if</span> ~isempty(wt_start)  
+0024     <span class="keyword">if</span> wt_end(1)&lt;wt_start(1), 
+0025         wt_end = wt_end(2:end); 
+0026     <span class="keyword">end</span>    
+0027     <span class="keyword">if</span> wt_start(end)&gt;wt_end(end),
+0028         wt_start = wt_start(1:end-1);
+0029     <span class="keyword">end</span>
+0030     
+0031     <span class="comment">%% for each cluster of identical points, pick the one with</span>
+0032     <span class="comment">%% maximum energy and put the others in the remove list</span>
+0033     
+0034     remove = [];
+0035     <span class="keyword">for</span> k=1:length(wt_start)
+0036         indexes_same  = ind(wt_start(k):wt_end(k));
+0037         ener_same     = ener(indexes_same);
+0038         [maxen,indh] =max(ener_same);    
+0039         indexes_same(indh) =[];
+0040         remove =[remove,indexes_same']; 
+0041     <span class="keyword">end</span>
+0042     keep = setdiff(1:length(indexes),remove);
+0043     points_kept = <a href="../PS_primal_sketch/misc/keep_points.html" class="code" title="function res = keep_points(inp,keep,mode);">keep_points</a>(points,keep);
+0044 <span class="keyword">else</span>
+0045     points_kept = points;
+0046 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

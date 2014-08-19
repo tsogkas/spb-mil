@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PS2z1__choose_tokens</title>
+  <meta name="keywords" content="PS2z1__choose_tokens">
+  <meta name="description" content="inp_points = PS2z1_choose_points(inp_points,rel)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PS2z1__choose_tokens.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PS2z1__choose_tokens
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>inp_points = PS2z1_choose_points(inp_points,rel)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function inp_points = PS2z1_choose_points(inp_points,rel); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> inp_points = PS2z1_choose_points(inp_points,rel)
+ 
+ Rel is a set of acceptance criteria applied to the fields of 
+ inp_points. All of them are enforced to keep a subset of inp_points.
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS2____post_process.html" class="code" title="function [blob_feats,ridge_feats,edge_feats,contours,conn_components] = PS2___post_process(maxima_points,imsize,settings_tokens);">PS2____post_process</a>	[blob_feats,ridge_feats,edge_feats,contours,component_strings] = PS2___post_process(maxima_points,imsize,settings_tokens)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function inp_points = PS2z1_choose_points(inp_points,rel);</a>
+0002 <span class="comment">% inp_points = PS2z1_choose_points(inp_points,rel)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Rel is a set of acceptance criteria applied to the fields of</span>
+0005 <span class="comment">% inp_points. All of them are enforced to keep a subset of inp_points.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0008 <span class="comment">% 10/10/2007</span>
+0009 
+0010 <span class="keyword">for</span> k=1:length(rel),
+0011     eval(sprintf(<span class="string">'inp_points = keep_points(inp_points,find(inp_points.%s));'</span>,rel{k}));
+0012 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

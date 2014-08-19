@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PS0z2__settings_tokens</title>
+  <meta name="keywords" content="PS0z2__settings_tokens">
+  <meta name="description" content="settings_tokens_out = PS0z2__settings_tokens(input_image,settings_tokens_in,settings_sketch)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PS0z2__settings_tokens.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PS0z2__settings_tokens
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>settings_tokens_out = PS0z2__settings_tokens(input_image,settings_tokens_in,settings_sketch)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function settings_tokens_out = PS0z2__settings_tokens(input_image,settings_tokens_in,settings_sketch); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> settings_tokens_out = PS0z2__settings_tokens(input_image,settings_tokens_in,settings_sketch)
+
+ Sets default fields for token extraction &amp; selection.
+ If settings_sketch_in is not empty, defaults are overriden by
+ the settings_sketch_in fields.
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../PS_primal_sketch/misc/compress_structure.html" class="code" title="">compress_structure</a>	</li><li><a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS00___primal_sketch.html" class="code" title="function [ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests);">PS00___primal_sketch</a>	[ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function settings_tokens_out = PS0z2__settings_tokens(input_image,settings_tokens_in,settings_sketch);</a>
+0002 <span class="comment">% settings_tokens_out = PS0z2__settings_tokens(input_image,settings_tokens_in,settings_sketch)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Sets default fields for token extraction &amp; selection.</span>
+0005 <span class="comment">% If settings_sketch_in is not empty, defaults are overriden by</span>
+0006 <span class="comment">% the settings_sketch_in fields.</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0009 <span class="comment">% 10/10/2007</span>
+0010 
+0011 <span class="comment">%%-------------------------------------------------------------------</span>
+0012 <span class="comment">%% 1. Setup default token thresholds</span>
+0013 <span class="comment">%%-------------------------------------------------------------------</span>
+0014 [size_m,size_n] = size(input_image);
+0015 thresh_line_ener     = .02;   <span class="comment">%% a very small threshold on the energy of a ridge/edge point, only to speed up processing</span>
+0016 
+0017 <span class="comment">%% thresholds for accepting a ridge token:</span>
+0018 <span class="comment">%% 1: threshold on averaged energy of differential operator</span>
+0019 ener_ridge_threshold  = .13;
+0020 <span class="comment">%% 2: and threshold on `merit' used in Lowe's '87 cuvre partitioning algorithm</span>
+0021 merit_ridge_threshold = 4;
+0022 
+0023 <span class="comment">%% same for edges</span>
+0024 ener_edge_threshold   = .13;
+0025 merit_edge_threshold  = 4;
+0026 
+0027 <span class="comment">%% thresholds for accepting a blob token:</span>
+0028 <span class="comment">%% 1: threshold on energy</span>
+0029 ener_blob_threshold   = .12;
+0030 <span class="comment">%% 2: upper and lower thresholds on the curvature-related</span>
+0031 <span class="comment">%% quantity used in Lowe's '04 paper (a high value indicates edges, and should</span>
+0032 <span class="comment">%% lead to  rejection)</span>
+0033 curv_up_threshold     = 10;
+0034 curv_down_threshold   = 0;
+0035 <span class="comment">%% 3: threshold on distance formed by adding blob scale and location</span>
+0036 <span class="comment">%% distances used to label a pair of blobs as overlapping</span>
+0037 threshold_overlapping = 2;
+0038 
+0039 <span class="comment">%%------------------------------------------------------------------</span>
+0040 <span class="comment">%% 2. override default settings</span>
+0041 <span class="comment">%%------------------------------------------------------------------</span>
+0042 <span class="keyword">if</span> ~isempty(settings_tokens_in),
+0043     structure=  settings_tokens_in; <a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>;
+0044 <span class="keyword">end</span>
+0045 
+0046 <span class="comment">%%-------------------------------------------------------------------</span>
+0047 <span class="comment">%% 3. form string expressions for the feature acceptance conditions</span>
+0048 <span class="comment">%%-------------------------------------------------------------------</span>
+0049 ener_ridge  = sprintf(<span class="string">'ener&gt;%.3f'</span>,  ener_ridge_threshold);
+0050 ener_edge   = sprintf(<span class="string">'ener&gt;%.3f'</span>,  ener_edge_threshold);
+0051 ener_blob   = sprintf(<span class="string">'ener&gt;%.3f'</span>,  ener_blob_threshold);
+0052 merit_ridge = sprintf(<span class="string">'merit_geom&gt;%.3f'</span>, merit_ridge_threshold);
+0053 merit_edge  = sprintf(<span class="string">'merit_geom&gt;%.3f'</span>, merit_edge_threshold);
+0054 curv_up     = sprintf(<span class="string">'curv&lt;%.3f'</span>,curv_up_threshold);
+0055 curv_down   = sprintf(<span class="string">'curv&gt;%.3f'</span>,curv_down_threshold);
+0056 
+0057 scale_cond  = sprintf(<span class="string">'scales&gt;%.3f'</span>,settings_sketch.scales_wt(3));
+0058 
+0059 fields_wt= {<span class="string">'ener_ridge'</span>,<span class="string">'ener_edge'</span>,<span class="string">'ener_blob'</span>,<span class="string">'merit_ridge'</span>,<span class="string">'merit_edge'</span>,<span class="keyword">...</span>
+0060             <span class="string">'curv_up'</span>,<span class="string">'curv_down'</span>,<span class="string">'thresh_line_ener'</span>,<span class="string">'scale_cond'</span>,<span class="string">'threshold_overlapping'</span>,<span class="keyword">...</span>
+0061             };
+0062 <a href="../PS_primal_sketch/misc/compress_structure.html" class="code" title="">compress_structure</a>;
+0063 settings_tokens_out = structure;
+0064 
+0065</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

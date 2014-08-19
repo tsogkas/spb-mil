@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PSL____line_tokens</title>
+  <meta name="keywords" content="PSL____line_tokens">
+  <meta name="description" content="[line_features,contour,components] = PSL____line_tokens(edge_points,imsize,thresh_line_ener)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PSL____line_tokens.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PSL____line_tokens
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[line_features,contour,components] = PSL____line_tokens(edge_points,imsize,thresh_line_ener)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [line_features,contours,components] = PSL____line_tokens(points,imsize,thresh_line_ener); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [line_features,contour,components] = PSL____line_tokens(edge_points,imsize,thresh_line_ener)
+
+ Converts a list of edge points into a set of straight line tokens.
+ INPUT: 
+     points: scale &amp; space maxima locations provided by PS1____scale_space_sketch
+     imsize: image dimensions
+     thresh_line_ener: a threshold to discard very low energy points.  
+ OUTPUT:
+     line_features: a structure describing the extracted straight lines.
+     contours: a structure for the set of ridge/edge maxima points and
+               their attributes.
+     components: connected components of edge/ridge curves, before line
+               segmentation is applied.
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSLz1__preprocess_points.html" class="code" title="function [points,contours]   = PSLz1__preprocess_points(points,imsize);">PSLz1__preprocess_points</a>	[points,contours]   = PSLz1__preprocess_points(points,imsize)</li><li><a href="PSLz2a_get_relatives.html" class="code" title="function [successors,predecessors,current] = PSLz3_get_neighbors(points,imsize);">PSLz2a_get_relatives</a>	[successors,predecessors,current] = PSLz3_get_neighbors(points,imsize)</li><li><a href="PSLz2b_process_relatives.html" class="code" title="function relative = PSLz4_process_relatives(relatives,current);">PSLz2b_process_relatives</a>	relative = PSLz4_process_relatives(relatives,current)</li><li><a href="PSLz2c_find_connected_curves.html" class="code" title="function string_structure = PSLz2c_find_connected_curves(current,succ,pred);">PSLz2c_find_connected_curves</a>	string_structure = PSLz2c_find_connected_curves(current,succ,pred)</li><li><a href="PSLz3a_break_into_lines.html" class="code" title="function res = PSLz3a_break_into_lines(components,size_m,ener);">PSLz3a_break_into_lines</a>	res = PSLz3a_break_into_lines(components,size_m,size_n,ener)</li><li><a href="PSLz3b_embed_lines.html" class="code" title="function line_features = PSLz3b_embed_lines(line_parsing,thresh_line_ener);">PSLz3b_embed_lines</a>	line_features = PSLz3b_embed_lines(line_parsing,thresh_line_ener)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS2____post_process.html" class="code" title="function [blob_feats,ridge_feats,edge_feats,contours,conn_components] = PS2___post_process(maxima_points,imsize,settings_tokens);">PS2____post_process</a>	[blob_feats,ridge_feats,edge_feats,contours,component_strings] = PS2___post_process(maxima_points,imsize,settings_tokens)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [line_features,contours,components] = PSL____line_tokens(points,imsize,thresh_line_ener);</a>
+0002 <span class="comment">% [line_features,contour,components] = PSL____line_tokens(edge_points,imsize,thresh_line_ener)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Converts a list of edge points into a set of straight line tokens.</span>
+0005 <span class="comment">% INPUT:</span>
+0006 <span class="comment">%     points: scale &amp; space maxima locations provided by PS1____scale_space_sketch</span>
+0007 <span class="comment">%     imsize: image dimensions</span>
+0008 <span class="comment">%     thresh_line_ener: a threshold to discard very low energy points.</span>
+0009 <span class="comment">% OUTPUT:</span>
+0010 <span class="comment">%     line_features: a structure describing the extracted straight lines.</span>
+0011 <span class="comment">%     contours: a structure for the set of ridge/edge maxima points and</span>
+0012 <span class="comment">%               their attributes.</span>
+0013 <span class="comment">%     components: connected components of edge/ridge curves, before line</span>
+0014 <span class="comment">%               segmentation is applied.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0017 <span class="comment">% 10/10/2007</span>
+0018 
+0019 <span class="comment">%%-------------------------------------------------------------------------</span>
+0020 <span class="comment">%% Part I: clean up the set of points delivered by the PS1* primal sketch code</span>
+0021 <span class="comment">%%-------------------------------------------------------------------------</span>
+0022 [points,contours]   = <a href="PSLz1__preprocess_points.html" class="code" title="function [points,contours]   = PSLz1__preprocess_points(points,imsize);">PSLz1__preprocess_points</a>(points,imsize);
+0023 
+0024 <span class="comment">%%-------------------------------------------------------------------------</span>
+0025 <span class="comment">%% Part II: find which points are neighbors and track connected components</span>
+0026 <span class="comment">%%-------------------------------------------------------------------------</span>
+0027 
+0028 [successors,predecessors,current]           = <a href="PSLz2a_get_relatives.html" class="code" title="function [successors,predecessors,current] = PSLz3_get_neighbors(points,imsize);">PSLz2a_get_relatives</a>(points,imsize);
+0029 relative_pr                                 = <a href="PSLz2b_process_relatives.html" class="code" title="function relative = PSLz4_process_relatives(relatives,current);">PSLz2b_process_relatives</a>(predecessors,current);
+0030 relative_sc                                 = <a href="PSLz2b_process_relatives.html" class="code" title="function relative = PSLz4_process_relatives(relatives,current);">PSLz2b_process_relatives</a>(successors,current);
+0031 components                                  = <a href="PSLz2c_find_connected_curves.html" class="code" title="function string_structure = PSLz2c_find_connected_curves(current,succ,pred);">PSLz2c_find_connected_curves</a>(current,relative_sc,relative_pr);
+0032 
+0033 <span class="comment">%%-------------------------------------------------------------------------</span>
+0034 <span class="comment">%% Part III: break components into straight line segments</span>
+0035 <span class="comment">%%-------------------------------------------------------------------------</span>
+0036 line_parsing        =  <a href="PSLz3a_break_into_lines.html" class="code" title="function res = PSLz3a_break_into_lines(components,size_m,ener);">PSLz3a_break_into_lines</a>(components,imsize(1));
+0037 line_features       =  <a href="PSLz3b_embed_lines.html" class="code" title="function line_features = PSLz3b_embed_lines(line_parsing,thresh_line_ener);">PSLz3b_embed_lines</a>(line_parsing,thresh_line_ener);
+0038 
+0039 
+0040 
+0041</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

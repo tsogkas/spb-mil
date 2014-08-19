@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of show_ellipses_on_image</title>
+  <meta name="keywords" content="show_ellipses_on_image">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">viz</a> &gt; show_ellipses_on_image.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\viz&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>show_ellipses_on_image
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function show_ellipses_on_image(input_image,keyps,sc_k,selection,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>	</li><li><a href="../../PS_primal_sketch/misc/expand_varargin.html" class="code" title="">expand_varargin</a>	</li><li><a href="draw_arrow.html" class="code" title="function h = draw_arrow(x, r, orientation,outline_color)">draw_arrow</a>	draw filled circles at centers x with radii r.</li><li><a href="my_draw_ellipse.html" class="code" title="function h = draw_ellipse(x, rotation,eigenvals, outline_color, fill_color)">my_draw_ellipse</a>	DRAW_ELLIPSE(x, c, outline_color, fill_color)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../PS_primal_sketch/demo1.html" class="code" title="">demo1</a>	% Basic primal sketch demo:</li><li><a href="../../PS_primal_sketch/demo2.html" class="code" title="">demo2</a>	% Shows how to override the standard settings</li><li><a href="../../PS_primal_sketch/misc/pick_ps_point.html" class="code" title="function [res,ind]  = pick_ps_point(input_image,ps_points);">pick_ps_point</a>	</li><li><a href="show_ridges_on_image.html" class="code" title="function show_ridges_on_image(input_image,keyps,sc_k,selection,varargin)">show_ridges_on_image</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function show_ellipses_on_image(input_image,keyps,sc_k,selection,varargin)</a>
+0002 color_ell = <span class="string">'c'</span>;
+0003 color_arr = [1,1/3,0];
+0004 lw = 2.5;
+0005 selection_given = exist(<span class="string">'selection'</span>);
+0006 <span class="keyword">if</span> ~isempty(input_image),
+0007     imshow(input_image)
+0008 <span class="keyword">end</span>
+0009 <span class="keyword">if</span> ~isempty(varargin),
+0010     <a href="../../PS_primal_sketch/misc/expand_varargin.html" class="code" title="">expand_varargin</a>;
+0011 <span class="keyword">end</span>
+0012 no_arrow = 0;
+0013 <span class="keyword">try</span>,
+0014     <span class="keyword">if</span> ~all(color_arr==[1,1,1]),
+0015         error,
+0016     <span class="keyword">end</span>
+0017     no_arrow=  1;
+0018 <span class="keyword">end</span>
+0019 structure = keyps; <a href="../../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>;
+0020 
+0021 <span class="keyword">if</span> ~exist(<span class="string">'selection'</span>)|isempty(selection)
+0022     selection = 1:length(c_m);
+0023 <span class="keyword">end</span>
+0024 
+0025 <span class="keyword">if</span> ~exist(<span class="string">'sc_k'</span>)|(isempty(sc_k))
+0026     sc_k  = 1; 
+0027 <span class="keyword">end</span>
+0028 c_m  =round(c_m); c_n = round(c_n);
+0029 <span class="keyword">for</span> k_ind= 1:length(selection),
+0030     k  = selection(k_ind);
+0031     orn = orientations(k);
+0032     sc =  scales(k);
+0033     <span class="keyword">try</span>,
+0034         ratio = ratios(k);
+0035     <span class="keyword">catch</span>
+0036         ratio =1;
+0037     <span class="keyword">end</span>
+0038     orn  = orn;
+0039     
+0040     rotation = [cos(orn),-sin(orn);sin(orn),cos(orn)];
+0041     eigs = sc*[1,0;0,ratio];    
+0042     center = [c_n(k);c_m(k)];
+0043     hold on;
+0044     h = <a href="my_draw_ellipse.html" class="code" title="function h = draw_ellipse(x, rotation,eigenvals, outline_color, fill_color)">my_draw_ellipse</a>(center,rotation,diag(eigs));
+0045     set(h,<span class="string">'color'</span>,color_ell);
+0046     set(h,<span class="string">'linewidth'</span>,lw);
+0047     hold on;
+0048     <span class="keyword">if</span> ~no_arrow,
+0049     sc_u =sc_k*sc;
+0050     h =<a href="draw_arrow.html" class="code" title="function h = draw_arrow(x, r, orientation,outline_color)">draw_arrow</a>([c_n(k);c_m(k)],sc_u,orn,color_arr);
+0051     set(h,<span class="string">'linewidth'</span>,lw);
+0052     <span class="keyword">end</span>
+0053 
+0054 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of kdtree_txt</title>
+  <meta name="keywords" content="kdtree_txt">
+  <meta name="description" content="KDTREE Find closest points using a k-D tree.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">kdtree</a> &gt; kdtree_txt.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\kdtree&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>kdtree_txt
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>KDTREE Find closest points using a k-D tree.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment">
+ KDTREE Find closest points using a k-D tree.
+ 
+  CP = KDTREE( REFERENCE, MODEL ) finds the closest points in
+  REFERENCE for each point in MODEL. The search is performed in an
+  efficient manner by building a k-D tree from the datapoints in
+  REFERENCE, and querying the tree for each datapoint in
+  MODEL. 
+
+  Input :
+    REFERENCE is an NxD matrix, where each row is a D-dimensional
+    point. MODEL is an MxD matrix, where each row is a D-dimensional
+    query point. 
+
+  Output:
+    CP is the same dimension as MODEL. There is a one-to-one
+    relationship between the rows of MODEL and the rows of CP. The
+    i-th row (point) of CP is a row (point) from REFERENCE which
+    is closest to the i-th row (point) of MODEL. The &quot;closest&quot;
+    metric is defined as the D-dimensional Euclidean (2-norm)
+    distance.
+
+  
+  [CP, DIST] = KDTREE( ... ) returns the distances between
+  each row of MODEL and its closest point match from the k-D tree
+  in the vector DIST. DIST(i) corresponds to the i-th row (point)
+  of MODEL.
+
+  The default behavior of the function is that the k-D tree is
+  destroyed when the function returns. If you would like to save
+  the k-D tree in memory for use at a later time for additional
+  queries on the same REFERENCE data, then call the function with
+  an additional output:
+
+      [CP, DIST, ROOT] = KDTREE(REFERENCE, MODEL) where ROOT
+      receives a pointer to the root of the k-D tree.
+
+  Subsequently, use the following call to pass the k-D tree back
+  into the mex function:
+
+      [CP, DIST, ROOT] = KDTREE([], MODEL, ROOT)
+ 
+  Note that ROOT is again an output, preventing the tree from
+  being removed from memory. 
+
+  Ultimately, to clear the k-D tree from memory, pass ROOT as
+  input, but do not receive it as output:
+
+      KDTREE([], [], ROOT)
+
+  New since June 2004: This k-D tree library now handles points
+  with dimension greater than 3.
+
+  See also KDTREEIDX and KDRANGEQUERY.
+
+  Written by / send comments or suggestions to :
+     Guy Shechter
+     guy at jhu dot edu
+     June 2004</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%</span>
+0002 <span class="comment">% KDTREE Find closest points using a k-D tree.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%  CP = KDTREE( REFERENCE, MODEL ) finds the closest points in</span>
+0005 <span class="comment">%  REFERENCE for each point in MODEL. The search is performed in an</span>
+0006 <span class="comment">%  efficient manner by building a k-D tree from the datapoints in</span>
+0007 <span class="comment">%  REFERENCE, and querying the tree for each datapoint in</span>
+0008 <span class="comment">%  MODEL.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%  Input :</span>
+0011 <span class="comment">%    REFERENCE is an NxD matrix, where each row is a D-dimensional</span>
+0012 <span class="comment">%    point. MODEL is an MxD matrix, where each row is a D-dimensional</span>
+0013 <span class="comment">%    query point.</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%  Output:</span>
+0016 <span class="comment">%    CP is the same dimension as MODEL. There is a one-to-one</span>
+0017 <span class="comment">%    relationship between the rows of MODEL and the rows of CP. The</span>
+0018 <span class="comment">%    i-th row (point) of CP is a row (point) from REFERENCE which</span>
+0019 <span class="comment">%    is closest to the i-th row (point) of MODEL. The &quot;closest&quot;</span>
+0020 <span class="comment">%    metric is defined as the D-dimensional Euclidean (2-norm)</span>
+0021 <span class="comment">%    distance.</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">%  [CP, DIST] = KDTREE( ... ) returns the distances between</span>
+0025 <span class="comment">%  each row of MODEL and its closest point match from the k-D tree</span>
+0026 <span class="comment">%  in the vector DIST. DIST(i) corresponds to the i-th row (point)</span>
+0027 <span class="comment">%  of MODEL.</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">%  The default behavior of the function is that the k-D tree is</span>
+0030 <span class="comment">%  destroyed when the function returns. If you would like to save</span>
+0031 <span class="comment">%  the k-D tree in memory for use at a later time for additional</span>
+0032 <span class="comment">%  queries on the same REFERENCE data, then call the function with</span>
+0033 <span class="comment">%  an additional output:</span>
+0034 <span class="comment">%</span>
+0035 <span class="comment">%      [CP, DIST, ROOT] = KDTREE(REFERENCE, MODEL) where ROOT</span>
+0036 <span class="comment">%      receives a pointer to the root of the k-D tree.</span>
+0037 <span class="comment">%</span>
+0038 <span class="comment">%  Subsequently, use the following call to pass the k-D tree back</span>
+0039 <span class="comment">%  into the mex function:</span>
+0040 <span class="comment">%</span>
+0041 <span class="comment">%      [CP, DIST, ROOT] = KDTREE([], MODEL, ROOT)</span>
+0042 <span class="comment">%</span>
+0043 <span class="comment">%  Note that ROOT is again an output, preventing the tree from</span>
+0044 <span class="comment">%  being removed from memory.</span>
+0045 <span class="comment">%</span>
+0046 <span class="comment">%  Ultimately, to clear the k-D tree from memory, pass ROOT as</span>
+0047 <span class="comment">%  input, but do not receive it as output:</span>
+0048 <span class="comment">%</span>
+0049 <span class="comment">%      KDTREE([], [], ROOT)</span>
+0050 <span class="comment">%</span>
+0051 <span class="comment">%  New since June 2004: This k-D tree library now handles points</span>
+0052 <span class="comment">%  with dimension greater than 3.</span>
+0053 <span class="comment">%</span>
+0054 <span class="comment">%  See also KDTREEIDX and KDRANGEQUERY.</span>
+0055 <span class="comment">%</span>
+0056 <span class="comment">%  Written by / send comments or suggestions to :</span>
+0057 <span class="comment">%     Guy Shechter</span>
+0058 <span class="comment">%     guy at jhu dot edu</span>
+0059 <span class="comment">%     June 2004</span>
+0060 <span class="comment">%</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PS00___primal_sketch</title>
+  <meta name="keywords" content="PS00___primal_sketch">
+  <meta name="description" content="[ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PS00___primal_sketch.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PS00___primal_sketch
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests)
+
+ Gateway routine for primal sketch computation 
+ INPUT:
+   input_image:  grayscale image, normalized to lie in [0,1]
+   settings_sketch, settings_tests (optional): user-defined setting structures
+               overriding defaults in PS0z{1,2}_settings_{sketch,tokens}
+
+ OUTPUT: 
+   {ridge,edge,blob}_feats: structures containing coordinates and
+              attributes (scale, orientation, etc) of primal sketch tokens
+   contours: cell array containing locations of ridge/edge maxima points
+   conn_components: connected components of ridge and edge contours
+   scale_space_ims: cubes containing ridge/edge/blob/intensity in space x scale 
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS0z1__settings_sketch.html" class="code" title="function settings_sketch_out = PS0z1__settings_sketch(input_image,settings_sketch_in);">PS0z1__settings_sketch</a>	settings_sketch_in = PS0z1__settings_sketch(input_image,settings_sketch_in)</li><li><a href="PS0z2__settings_tokens.html" class="code" title="function settings_tokens_out = PS0z2__settings_tokens(input_image,settings_tokens_in,settings_sketch);">PS0z2__settings_tokens</a>	settings_tokens_out = PS0z2__settings_tokens(input_image,settings_tokens_in,settings_sketch)</li><li><a href="PS1____scale_space_sketch.html" class="code" title="function [points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch);">PS1____scale_space_sketch</a>	[points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch)</li><li><a href="PS2____post_process.html" class="code" title="function [blob_feats,ridge_feats,edge_feats,contours,conn_components] = PS2___post_process(maxima_points,imsize,settings_tokens);">PS2____post_process</a>	[blob_feats,ridge_feats,edge_feats,contours,component_strings] = PS2___post_process(maxima_points,imsize,settings_tokens)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo1.html" class="code" title="">demo1</a>	% Basic primal sketch demo:</li><li><a href="demo2.html" class="code" title="">demo2</a>	% Shows how to override the standard settings</li><li><a href="demo3.html" class="code" title="">demo3</a>	% A demonstration of the intermediate</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests);</a>
+0002 <span class="comment">% [ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Gateway routine for primal sketch computation</span>
+0005 <span class="comment">% INPUT:</span>
+0006 <span class="comment">%   input_image:  grayscale image, normalized to lie in [0,1]</span>
+0007 <span class="comment">%   settings_sketch, settings_tests (optional): user-defined setting structures</span>
+0008 <span class="comment">%               overriding defaults in PS0z{1,2}_settings_{sketch,tokens}</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% OUTPUT:</span>
+0011 <span class="comment">%   {ridge,edge,blob}_feats: structures containing coordinates and</span>
+0012 <span class="comment">%              attributes (scale, orientation, etc) of primal sketch tokens</span>
+0013 <span class="comment">%   contours: cell array containing locations of ridge/edge maxima points</span>
+0014 <span class="comment">%   conn_components: connected components of ridge and edge contours</span>
+0015 <span class="comment">%   scale_space_ims: cubes containing ridge/edge/blob/intensity in space x scale</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0018 <span class="comment">% 10/10/2007</span>
+0019 
+0020 <span class="comment">%%------------------------------------------------------------------------</span>
+0021 <span class="comment">%% Get overall settings for primal sketch extraction</span>
+0022 <span class="comment">%%------------------------------------------------------------------------</span>
+0023 <span class="keyword">if</span> nargin==1, settings_sketch  =[]; settings_tests = []; <span class="keyword">end</span>
+0024 settings_sketch = <a href="PS0z1__settings_sketch.html" class="code" title="function settings_sketch_out = PS0z1__settings_sketch(input_image,settings_sketch_in);">PS0z1__settings_sketch</a>(input_image,settings_sketch);
+0025 settings_tokens = <a href="PS0z2__settings_tokens.html" class="code" title="function settings_tokens_out = PS0z2__settings_tokens(input_image,settings_tokens_in,settings_sketch);">PS0z2__settings_tokens</a>(input_image,settings_tests,settings_sketch);
+0026 imsize = size(input_image);
+0027 
+0028 <span class="comment">%%------------------------------------------------------------------------</span>
+0029 <span class="comment">%% Core primal sketch: form scale space, get maxima of</span>
+0030 <span class="comment">%% edge, ridge &amp; blob differential operators</span>
+0031 <span class="comment">%%------------------------------------------------------------------------</span>
+0032 [maxima_points,scale_space_ims]                               = <a href="PS1____scale_space_sketch.html" class="code" title="function [points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch);">PS1____scale_space_sketch</a>(input_image,settings_sketch);
+0033 [blob_feats,ridge_feats,edge_feats,contours,conn_components]  = <a href="PS2____post_process.html" class="code" title="function [blob_feats,ridge_feats,edge_feats,contours,conn_components] = PS2___post_process(maxima_points,imsize,settings_tokens);">PS2____post_process</a>(maxima_points,imsize,settings_tokens);</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

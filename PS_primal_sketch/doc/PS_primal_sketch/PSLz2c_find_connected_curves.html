@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PSLz2c_find_connected_curves</title>
+  <meta name="keywords" content="PSLz2c_find_connected_curves">
+  <meta name="description" content="string_structure = PSLz2c_find_connected_curves(current,succ,pred)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PSLz2c_find_connected_curves.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PSLz2c_find_connected_curves
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>string_structure = PSLz2c_find_connected_curves(current,succ,pred)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function string_structure = PSLz2c_find_connected_curves(current,succ,pred); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> string_structure = PSLz2c_find_connected_curves(current,succ,pred)
+
+ Extract continuous contour segments using the neighborhood information of
+ succ/pred.
+ 
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSLz2cI_track_curve.html" class="code" title="function    [passed,string_str,ener_str,scale_str] = PSLz2cI_track_curve(index_start,passed,indexes,ener,scl,lookup,succ,pred,iters);">PSLz2cI_track_curve</a>	[passed,string_str,ener_str,scale_str] = PSLz2cI_track_curve(index_start,passed,indexes,ener,scl,lookup,succ,pred,iters)</li><li><a href="../PS_primal_sketch/misc/compress_structure.html" class="code" title="">compress_structure</a>	</li><li><a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSL____line_tokens.html" class="code" title="function [line_features,contours,components] = PSL____line_tokens(points,imsize,thresh_line_ener);">PSL____line_tokens</a>	[line_features,contour,components] = PSL____line_tokens(edge_points,imsize,thresh_line_ener)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function string_structure = PSLz2c_find_connected_curves(current,succ,pred);</a>
+0002 <span class="comment">% string_structure = PSLz2c_find_connected_curves(current,succ,pred)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Extract continuous contour segments using the neighborhood information of</span>
+0005 <span class="comment">% succ/pred.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0008 <span class="comment">% 10/10/2007</span>
+0009 
+0010 
+0011 <span class="comment">%%-------------------------------------------------------------------------</span>
+0012 <span class="comment">%% lookup table</span>
+0013 <span class="comment">%% if lookup(k) = i,</span>
+0014 <span class="comment">%% this means that at the image index `k' the i'th skeleton point is present.</span>
+0015 <span class="comment">%% Otherwise (lookup(k) = 0) no point is active.</span>
+0016 <span class="comment">%% make also a matrix (passed) to indicate whether a curve has already</span>
+0017 <span class="comment">%% taken hold of the corresponding skeleton point</span>
+0018 <span class="comment">%%-------------------------------------------------------------------------</span>
+0019 
+0020 structure = current; <a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>;
+0021 lookup(max(indexes))=0;
+0022 
+0023 passed(indexes)  = false;
+0024 <span class="keyword">for</span> k=1:length(indexes),
+0025     lookup(indexes(k)) = k;
+0026 <span class="keyword">end</span>
+0027 permt =  randperm(length(indexes));
+0028 <span class="comment">%for k= [permt,permt,permt,permt],</span>
+0029 <span class="comment">%    passed(indexes(k)) = 1;</span>
+0030     <span class="comment">%end</span>
+0031 <span class="comment">%% get those points that have both a predecessor and successor</span>
+0032 <span class="comment">%% the other points serve as starting points</span>
+0033 
+0034 isok =  (succ~=-1)&amp;(pred~=-1);
+0035 starting_points = find(~isok);
+0036 
+0037 <span class="keyword">for</span> k=1:length(starting_points)    
+0038     [passed,string_str,ener_str,scale_str] = <a href="PSLz2cI_track_curve.html" class="code" title="function    [passed,string_str,ener_str,scale_str] = PSLz2cI_track_curve(index_start,passed,indexes,ener,scl,lookup,succ,pred,iters);">PSLz2cI_track_curve</a>(starting_points(k),passed,indexes,ener,scl,lookup,succ,pred,2);
+0039     lstrings{k} = string_str;
+0040     attribs{k}.ener  = ener_str;
+0041     attribs{k}.scl   = scale_str;
+0042     lst(k) = length(lstrings{k});
+0043 <span class="keyword">end</span>
+0044 
+0045 <span class="comment">%% Check if some line points were not assigned to any curve.</span>
+0046 <span class="comment">%% This can happen e.g if we have a closed contour, and therefore</span>
+0047 <span class="comment">%% no starting point.</span>
+0048 <span class="comment">%% If this is the case, start a curve at an arbitrary point and</span>
+0049 <span class="comment">%% track the curve both forward and backward.</span>
+0050 cont =1;
+0051 <span class="keyword">while</span> cont
+0052     not_passed = find(passed(indexes)~=1);
+0053     cont= ~isempty(not_passed);
+0054     <span class="keyword">if</span> cont
+0055         [passed,string_str,ener_str,scale_str] = <a href="PSLz2cI_track_curve.html" class="code" title="function    [passed,string_str,ener_str,scale_str] = PSLz2cI_track_curve(index_start,passed,indexes,ener,scl,lookup,succ,pred,iters);">PSLz2cI_track_curve</a>(not_passed(1),passed,indexes,ener,scl,lookup,succ,pred,2);
+0056         lstrings{end+1} = string_str;
+0057         lst(end+1)      = length(lstrings{end});
+0058         attribs{end+1}.ener  = ener_str;
+0059         attribs{end}.scl   = scale_str;        
+0060     <span class="keyword">end</span>
+0061 <span class="keyword">end</span>
+0062 
+0063 fields_wt = {<span class="string">'lstrings'</span>,<span class="string">'lst'</span>,<span class="string">'attribs'</span>};
+0064 <a href="../PS_primal_sketch/misc/compress_structure.html" class="code" title="">compress_structure</a>;
+0065 string_structure = structure;</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

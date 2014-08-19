@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PSLz3aI_recursive_break_tree</title>
+  <meta name="keywords" content="PSLz3aI_recursive_break_tree">
+  <meta name="description" content="bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PSLz3aI_recursive_break_tree.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PSLz3aI_recursive_break_tree
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)
+
+ Break a continuous curve into a set of straight line 
+ tokens using the procedure described in Lowe's SCEPRO '87 paper. 
+ The procedure is recursive and scale invariant.
+ At each recursion level it breaks  the curve into two curve segments
+ at the point where the curve difference from its straight-line
+ approximation is maximal.
+ Terminates when either the curve length is too short,
+ or the scale-invariant merit value does not increase when further 
+ breaking the curve apart. 
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSLz3aI_recursive_break_tree.html" class="code" title="function bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)">PSLz3aI_recursive_break_tree</a>	bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSLz3aI_recursive_break_tree.html" class="code" title="function bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)">PSLz3aI_recursive_break_tree</a>	bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)</li><li><a href="PSLz3a_break_into_lines.html" class="code" title="function res = PSLz3a_break_into_lines(components,size_m,ener);">PSLz3a_break_into_lines</a>	res = PSLz3a_break_into_lines(components,size_m,size_n,ener)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)</a>
+0002 <span class="comment">% bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Break a continuous curve into a set of straight line</span>
+0005 <span class="comment">% tokens using the procedure described in Lowe's SCEPRO '87 paper.</span>
+0006 <span class="comment">% The procedure is recursive and scale invariant.</span>
+0007 <span class="comment">% At each recursion level it breaks  the curve into two curve segments</span>
+0008 <span class="comment">% at the point where the curve difference from its straight-line</span>
+0009 <span class="comment">% approximation is maximal.</span>
+0010 <span class="comment">% Terminates when either the curve length is too short,</span>
+0011 <span class="comment">% or the scale-invariant merit value does not increase when further</span>
+0012 <span class="comment">% breaking the curve apart.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0015 <span class="comment">% 10/10/2007</span>
+0016 
+0017 
+0018 <span class="comment">%% bin_tree struct</span>
+0019 <span class="comment">%% allow -&gt; 1/0: split was successful/failed</span>
+0020 <span class="comment">%% cost  -&gt; figure of merit at current tree</span>
+0021 <span class="comment">%% points: indexes of starting and ending points</span>
+0022 
+0023 <span class="keyword">if</span> length(c_x)&lt;3,
+0024     <span class="comment">%% if the tree is too short, stop</span>
+0025     bin_tree.allow = 0;
+0026     bin_tree.merit = .1;
+0027     bin_tree.points =  [index(1),index(end)];
+0028 <span class="keyword">else</span>
+0029     <span class="comment">%% otherwise go on</span>
+0030     bin_tree.allow    = 1;    
+0031     diff_x = c_x(end) - c_x(1);
+0032     diff_y = c_y(end) - c_y(1);
+0033     
+0034     <span class="comment">%%  line approximation is locus of a x + b y + c =0</span>
+0035     <span class="comment">%% a,b,c are calculated from the endpoint locations</span>
+0036     <span class="keyword">if</span> diff_y~=0,
+0037         b=  - (diff_x)/(diff_y);
+0038         nrm  = sqrt(1 + b*b);
+0039         a = 1/nrm; b = b/nrm;
+0040     <span class="keyword">else</span> 
+0041         a = -diff_y/diff_x;
+0042         nrm = sqrt(1 + a*a);
+0043         a = a/nrm; b = 1/nrm;
+0044     <span class="keyword">end</span>    
+0045     length_here = sqrt(diff_x*diff_x + diff_y*diff_y);
+0046     c = - a*c_x(1) - b*c_y(1);
+0047     
+0048     <span class="comment">%% get the distances of all curve points from the straight line</span>
+0049     <span class="comment">%% approximation, find the point with maximal distance and</span>
+0050     <span class="comment">%% get figure of merit for current straight-line approximation</span>
+0051 
+0052     dists = abs(a*c_x + b*c_y + c);
+0053     [md,ind] = max(dists(2:end-1));
+0054     md = max(md,2);
+0055     merit_here = (length_here)/md;
+0056     
+0057     <span class="comment">%% go on, and do the same thing for the subsegments</span>
+0058     ind = ind+1;    
+0059     left_relative  = <a href="PSLz3aI_recursive_break_tree.html" class="code" title="function bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)">PSLz3aI_recursive_break_tree</a>(c_x(1:ind-1),c_y(1:ind-1),index(1:ind-1));
+0060     right_relative = <a href="PSLz3aI_recursive_break_tree.html" class="code" title="function bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)">PSLz3aI_recursive_break_tree</a>(c_x(ind:end),c_y(ind:end),index(ind:end));
+0061     
+0062     merit_left  = left_relative.merit;
+0063     merit_right = right_relative.merit;    
+0064     
+0065     allow_left = left_relative.allow;
+0066     allow_right = right_relative.allow;
+0067     points_left = left_relative.points;
+0068     points_right = right_relative.points;
+0069 
+0070     keep_original = 1;    
+0071     <span class="comment">%% both leaves allow for break</span>
+0072     <span class="keyword">if</span> (allow_left&amp;allow_right),  
+0073         <span class="comment">%% and the merit for one of the two leaves is higher</span>
+0074         <span class="keyword">if</span> max([merit_left,merit_right])&gt;merit_here, 
+0075             keep_original = 0;
+0076             bin_tree.merit    = [merit_left, merit_right];
+0077             bin_tree.points   = [points_left(1:end), points_right(2:end)];
+0078         <span class="keyword">end</span>
+0079     <span class="keyword">end</span>
+0080     <span class="keyword">if</span> keep_original,
+0081        bin_tree.merit = merit_here;
+0082        bin_tree.points = [index(1),index(end)];
+0083     <span class="keyword">end</span>
+0084 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

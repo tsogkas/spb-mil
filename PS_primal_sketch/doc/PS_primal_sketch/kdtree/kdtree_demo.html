@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of kdtree_demo</title>
+  <meta name="keywords" content="kdtree_demo">
+  <meta name="description" content="% Demo of the KDTREE and KDTREEIDX function.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">kdtree</a> &gt; kdtree_demo.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\kdtree&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>kdtree_demo
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>% Demo of the KDTREE and KDTREEIDX function.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% Demo of the KDTREE and KDTREEIDX function.
+%
+%   Guy Shechter
+%   guy at jhu dot edu
+%   June 2004</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%% Demo of the KDTREE and KDTREEIDX function.</span>
+0002 <span class="comment">%%</span>
+0003 <span class="comment">%%   Guy Shechter</span>
+0004 <span class="comment">%%   guy at jhu dot edu</span>
+0005 <span class="comment">%%   June 2004</span>
+0006 
+0007 <span class="comment">%% Generate a set of 10000 reference datapoints in R^5</span>
+0008 ReferencePts = rand(10000,5); 
+0009 
+0010 <span class="comment">%%% Build the k-d Tree once from the reference datapoints.</span>
+0011 [tmp, tmp, TreeRoot] = kdtree( ReferencePts, []);
+0012 
+0013 <span class="keyword">for</span> Iteration = 1:10
+0014 
+0015   disp(sprintf(<span class="string">'Iteration %3d: '</span>,Iteration));
+0016   
+0017   <span class="comment">%% Generate a random test set of 100 points in R^5</span>
+0018   TestPoints = rand(100, 5);
+0019 
+0020   <span class="comment">%% Find the closest point in ReferencePts for each random TestPoint</span>
+0021   [ ClosestPts, DistA, TreeRoot ] = kdtree([], TestPoints, <span class="keyword">...</span>
+0022                            TreeRoot);
+0023 
+0024   <span class="comment">%% Find the row index of the closest point in ReferencePts for</span>
+0025   <span class="comment">%each random TestPoint</span>
+0026   [ ClosestPtIndex, DistB, TreeRoot ] = kdtreeidx([], TestPoints, <span class="keyword">...</span>
+0027                           TreeRoot);
+0028     
+0029   <span class="comment">%% Are the two solutions equivalent?</span>
+0030   IndexedPts = ReferencePts(ClosestPtIndex,:);
+0031   <span class="keyword">if</span> sum(sum(abs([ IndexedPts - ClosestPts ]))) == 0
+0032     disp(<span class="string">'KDTREE and KDTREEIDX found the same set of closest points'</span>);
+0033   <span class="keyword">end</span>
+0034   
+0035 <span class="keyword">end</span>
+0036 
+0037 <span class="comment">%%% Free the k-D Tree from memory.</span>
+0038 kdtree([],[],TreeRoot);
+0039 
+0040 
+0041</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

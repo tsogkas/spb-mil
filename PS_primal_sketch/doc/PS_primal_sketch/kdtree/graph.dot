@@ -1,0 +1,9 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+
+  kdrange_demo [URL="kdrange_demo.html"];
+  kdrangequery_txt [URL="kdrangequery_txt.html"];
+  kdtree_demo [URL="kdtree_demo.html"];
+  kdtree_txt [URL="kdtree_txt.html"];
+  kdtreeidx_txt [URL="kdtreeidx_txt.html"];
+}

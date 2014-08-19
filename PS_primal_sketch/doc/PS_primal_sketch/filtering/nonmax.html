@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of nonmax</title>
+  <meta name="keywords" content="nonmax">
+  <meta name="description" content="function [im] = nonmax(im,theta)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">filtering</a> &gt; nonmax.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\filtering&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>nonmax
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [im] = nonmax(im,theta)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [im] = nonmax(im,theta) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> function [im] = nonmax(im,theta)
+
+ Perform non-max suppression on im orthogonal to theta.  Theta can be
+ a matrix providing a different theta for each pixel or a scalar
+ proving the same theta for every pixel.
+
+ David R. Martin &lt;dmartin@eecs.berkeley.edu&gt;
+ March 2003</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../PS_primal_sketch/PSLz1b_feature_matrices.html" class="code" title="function [points,skel,ener,scales,orient] = PSLz2_construct_matrices(points,imsize);">PSLz1b_feature_matrices</a>	[pointsskel,ener,scales,orient] = PSLz2_construct_matrices(points,imsize)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [im] = nonmax(im,theta)</a>
+0002 <span class="comment">% function [im] = nonmax(im,theta)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Perform non-max suppression on im orthogonal to theta.  Theta can be</span>
+0005 <span class="comment">% a matrix providing a different theta for each pixel or a scalar</span>
+0006 <span class="comment">% proving the same theta for every pixel.</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% David R. Martin &lt;dmartin@eecs.berkeley.edu&gt;</span>
+0009 <span class="comment">% March 2003</span>
+0010 
+0011 <span class="keyword">if</span> numel(theta)==1,
+0012   theta = theta .* ones(size(im));
+0013 <span class="keyword">end</span>
+0014 
+0015 <span class="comment">% Do non-max suppression orthogonal to theta.</span>
+0016 theta = mod(theta+pi/2,pi);
+0017 
+0018 <span class="comment">% The following diagram depicts the 8 cases for non-max suppression.</span>
+0019 <span class="comment">% Theta is valued in [0,pi), measured clockwise from the positive x</span>
+0020 <span class="comment">% axis.  The 'o' marks the pixel of interest, and the eight</span>
+0021 <span class="comment">% neighboring pixels are marked with '.'.  The orientation is divided</span>
+0022 <span class="comment">% into 8 45-degree blocks.  Within each block, we interpolate the</span>
+0023 <span class="comment">% image value between the two neighboring pixels.</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">%        .66.77.</span>
+0026 <span class="comment">%        5\ | /8</span>
+0027 <span class="comment">%        5 \|/ 8</span>
+0028 <span class="comment">%        .--o--.-----&gt; x-axis</span>
+0029 <span class="comment">%        4 /|\ 1</span>
+0030 <span class="comment">%        4/ | \1</span>
+0031 <span class="comment">%        .33.22.</span>
+0032 <span class="comment">%           |</span>
+0033 <span class="comment">%           |</span>
+0034 <span class="comment">%           v</span>
+0035 <span class="comment">%         y-axis</span>
+0036 <span class="comment">%</span>
+0037 <span class="comment">% In the code below, d is always the distance from A, so the distance</span>
+0038 <span class="comment">% to B is (1-d).  A and B are the two neighboring pixels of interest</span>
+0039 <span class="comment">% in each of the 8 cases.  Note that the clockwise ordering of A and B</span>
+0040 <span class="comment">% changes from case to case in order to make it easier to compute d.</span>
+0041 
+0042 <span class="comment">% Determine which pixels belong to which cases.</span>
+0043 mask15 = ( theta&gt;=0 &amp; theta&lt;pi/4 );
+0044 mask26 = ( theta&gt;=pi/4 &amp; theta&lt;pi/2 );
+0045 mask37 = ( theta&gt;=pi/2 &amp; theta&lt;pi*3/4 );
+0046 mask48 = ( theta&gt;=pi*3/4 &amp; theta&lt;pi );
+0047 
+0048 mask = ones(size(im));
+0049 [h,w] = size(im);
+0050 [ix,iy] = meshgrid(1:w,1:h);
+0051 
+0052 <span class="comment">% case 1</span>
+0053 idx = find( mask15 &amp; ix&lt;w &amp; iy&lt;h);
+0054 idxA = idx + h;
+0055 idxB = idx + h + 1;
+0056 d = tan(theta(idx));
+0057 imI = im(idxA).*(1-d) + im(idxB).*d;
+0058 mask(idx(find(im(idx)&lt;imI))) = 0;
+0059 
+0060 <span class="comment">% case 5</span>
+0061 idx = find( mask15 &amp; ix&gt;1 &amp; iy&gt;1);
+0062 idxA = idx - h;
+0063 idxB = idx - h - 1;
+0064 d = tan(theta(idx));
+0065 imI = im(idxA).*(1-d) + im(idxB).*d;
+0066 mask(idx(find(im(idx)&lt;imI))) = 0;
+0067 
+0068 <span class="comment">% case 2</span>
+0069 idx = find( mask26 &amp; ix&lt;w &amp; iy&lt;h );
+0070 idxA = idx + 1;
+0071 idxB = idx + h + 1;
+0072 d = tan(pi/2-theta(idx));
+0073 imI = im(idxA).*(1-d) + im(idxB).*d;
+0074 mask(idx(find(im(idx)&lt;imI))) = 0;
+0075 
+0076 <span class="comment">% case 6</span>
+0077 idx = find( mask26 &amp; ix&gt;1 &amp; iy&gt;1 );
+0078 idxA = idx - 1;
+0079 idxB = idx - h - 1;
+0080 d = tan(pi/2-theta(idx));
+0081 imI = im(idxA).*(1-d) + im(idxB).*d;
+0082 mask(idx(find(im(idx)&lt;imI))) = 0;
+0083 
+0084 <span class="comment">% case 3</span>
+0085 idx = find( mask37 &amp; ix&gt;1 &amp; iy&lt;h );
+0086 idxA = idx + 1;
+0087 idxB = idx - h + 1;
+0088 d = tan(theta(idx)-pi/2);
+0089 imI = im(idxA).*(1-d) + im(idxB).*d;
+0090 mask(idx(find(im(idx)&lt;imI))) = 0;
+0091 
+0092 <span class="comment">% case 7</span>
+0093 idx = find( mask37 &amp; ix&lt;w &amp; iy&gt;1 );
+0094 idxA = idx - 1;
+0095 idxB = idx + h - 1;
+0096 d = tan(theta(idx)-pi/2);
+0097 imI = im(idxA).*(1-d) + im(idxB).*d;
+0098 mask(idx(find(im(idx)&lt;imI))) = 0;
+0099 
+0100 <span class="comment">% case 4</span>
+0101 idx = find( mask48 &amp; ix&gt;1 &amp; iy&lt;h );
+0102 idxA = idx - h;
+0103 idxB = idx - h + 1;
+0104 d = tan(pi-theta(idx));
+0105 imI = im(idxA).*(1-d) + im(idxB).*d;
+0106 mask(idx(find(im(idx)&lt;imI))) = 0;
+0107 
+0108 <span class="comment">% case 8</span>
+0109 idx = find( mask48 &amp; ix&lt;w &amp; iy&gt;1 );
+0110 idxA = idx + h;
+0111 idxB = idx + h - 1;
+0112 d = tan(pi-theta(idx));
+0113 imI = im(idxA).*(1-d) + im(idxB).*d;
+0114 mask(idx(find(im(idx)&lt;imI))) = 0;
+0115 
+0116 <span class="comment">% apply mask</span>
+0117 im = im .* mask;</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

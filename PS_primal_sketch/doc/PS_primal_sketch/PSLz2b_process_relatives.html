@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PSLz2b_process_relatives</title>
+  <meta name="keywords" content="PSLz2b_process_relatives">
+  <meta name="description" content="relative = PSLz4_process_relatives(relatives,current)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PSLz2b_process_relatives.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PSLz2b_process_relatives
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>relative = PSLz4_process_relatives(relatives,current)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function relative = PSLz4_process_relatives(relatives,current); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> relative = PSLz4_process_relatives(relatives,current)
+
+ Process potential successors or predecessor of each point and choose the
+ single one that is most likely to be the actual neighbor.
+ Code is based on the Nevatia &amp; Babu algorithm, but does not deal with 
+ triple points.
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSL____line_tokens.html" class="code" title="function [line_features,contours,components] = PSL____line_tokens(points,imsize,thresh_line_ener);">PSL____line_tokens</a>	[line_features,contour,components] = PSL____line_tokens(edge_points,imsize,thresh_line_ener)</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function res = ismember2(input,options),</a></li><li><a href="#_sub2" class="code">function varargout = keep_points_double(pts,varargin);</a></li></ul>
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function relative = PSLz4_process_relatives(relatives,current);</a>
+0002 <span class="comment">% relative = PSLz4_process_relatives(relatives,current)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Process potential successors or predecessor of each point and choose the</span>
+0005 <span class="comment">% single one that is most likely to be the actual neighbor.</span>
+0006 <span class="comment">% Code is based on the Nevatia &amp; Babu algorithm, but does not deal with</span>
+0007 <span class="comment">% triple points.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0010 <span class="comment">% 10/10/2007</span>
+0011 
+0012 structure = relatives; <a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>;
+0013 
+0014 <span class="comment">%%-------------------------------------------------------------------------</span>
+0015 <span class="comment">%% part 1:</span>
+0016 <span class="comment">%% find which orientations are fine with current linelet's  orientation:</span>
+0017 <span class="comment">%% generates in batch mode the neighboring orientations</span>
+0018 <span class="comment">%% into which the currnet linelets may branch. It is  assumed</span>
+0019 <span class="comment">%% orientations can change by 45 degrees max at each pixel</span>
+0020 <span class="comment">%%-------------------------------------------------------------------------</span>
+0021 
+0022 allowed = mod(repmat(current.orient',[3,1]) + repmat([-1:1]',[1,length(current.orient)])-1,4)+1;
+0023 
+0024 <span class="comment">%%-------------------------------------------------------------------------</span>
+0025 <span class="comment">%% and  find for each of the possible neigbors</span>
+0026 <span class="comment">%% check whether his orientation is within the set of allowable</span>
+0027 <span class="comment">%% orientations</span>
+0028 <span class="comment">%%-------------------------------------------------------------------------</span>
+0029 ok = zeros(size(neigh_orient));
+0030 
+0031 <span class="keyword">for</span> k_potential = [1:3],        
+0032     <span class="keyword">for</span> k_neigh  =[1:3],        
+0033         ok(k_neigh,:)= max(ok(k_neigh,:),allowed(k_potential,:) == neigh_orient(k_neigh,:));
+0034         ok(k_neigh,:)= 1;
+0035     <span class="keyword">end</span>
+0036 <span class="keyword">end</span>
+0037 
+0038 <span class="comment">%%-------------------------------------------------------------------------</span>
+0039 <span class="comment">%% part 2:</span>
+0040 <span class="comment">%% for each linelet check how many of its potential neighbors</span>
+0041 <span class="comment">%% actually lie on the feature skeleton. Treat separately the</span>
+0042 <span class="comment">%% cases with double and single neighbors (we do not treat</span>
+0043 <span class="comment">%% triple neighbors).</span>
+0044 <span class="comment">%%-------------------------------------------------------------------------</span>
+0045 relative= -1*ones(1,length(neigh_ind));
+0046 nneighs = sum(neigh_active,1);
+0047 single_neigh = find(nneighs==1);
+0048 double_neigh = find(nneighs==2);
+0049 
+0050 <span class="comment">%%-------------------------------------------------------------------------</span>
+0051 <span class="comment">%% 2.1 single neighbor</span>
+0052 <span class="comment">%%-------------------------------------------------------------------------</span>
+0053 
+0054 <span class="comment">%%-------------------------------------------------------------------------</span>
+0055 <span class="comment">%% get `OK' index of the single active neighbor (batch mode code)</span>
+0056 [closest_neighbor,dum] = find(neigh_active(:,single_neigh));
+0057 idx  = closest_neighbor' + (single_neigh-1)*3;
+0058 condition_single = ok(idx); 
+0059 continued = single_neigh(find(condition_single));
+0060 
+0061 <span class="comment">%%-------------------------------------------------------------------------</span>
+0062 <span class="comment">%% for those that are indeed ok, store the index of their</span>
+0063 <span class="comment">%% single closest neighbor</span>
+0064 relative(continued) = neigh_ind(idx(find(condition_single)));
+0065 
+0066 <span class="comment">%%-------------------------------------------------------------------------</span>
+0067 <span class="comment">%% 2.2 double neighbors</span>
+0068 <span class="comment">%% case 1: 4-connected, similar orientation -&gt; no fork</span>
+0069 <span class="comment">%% case 2: 4-connected, vertical orientations-&gt; fork</span>
+0070 <span class="comment">%% case 3: 8-connected  -&gt; fork</span>
+0071 <span class="comment">%%-------------------------------------------------------------------------</span>
+0072 
+0073 <span class="comment">% for ease, gather all data related to the 2-neighbor pairs</span>
+0074 [neigh_active_d,neigh_ener_d,neigh_orient_d,dists_d]=  <a href="#_sub2" class="code" title="subfunction varargout = keep_points_double(pts,varargin);">keep_points_double</a><span class="keyword">...</span>
+0075     (double_neigh,neigh_active,neigh_ener,neigh_orient,neigh_dist);
+0076 
+0077 <span class="keyword">for</span> k=1:length(double_neigh),
+0078     <span class="comment">%% examine separately every linelet's neighbors:</span>
+0079     index = double_neigh(k);
+0080     [neighs] = find(neigh_active_d(:,k));
+0081     
+0082     <span class="comment">%% get the orientations, energies and distances</span>
+0083     <span class="comment">%% of the two active neighbors of the current linelet</span>
+0084     orient(1) = neigh_orient_d(neighs(1),k);
+0085     orient(2) = neigh_orient_d(neighs(2),k);
+0086 
+0087     ener_n(1) = neigh_ener_d(neighs(1),k);
+0088     ener_n(2) = neigh_ener_d(neighs(2),k);
+0089 
+0090     dist_n(1) = dists_d(neighs(1),k);
+0091     dist_n(2) = dists_d(neighs(2),k);
+0092 
+0093     <span class="comment">%% are they on contiguous locations?</span>
+0094     f_connected = (abs(neighs(2)-neighs(1))==1);
+0095     
+0096     <span class="comment">%% do they have similar orientations</span>
+0097     siml_orient = <a href="#_sub1" class="code" title="subfunction res = ismember2(input,options),">ismember2</a>(orient(1),mod(orient(2)+[-1:1]-1,4)+1);
+0098 
+0099     <span class="comment">%% case 1: 4-connected, similar orientation -&gt; no fork. e.g.:</span>
+0100     <span class="comment">%% 0 l</span>
+0101     <span class="comment">%% l l</span>
+0102     <span class="comment">%% 0 0</span>
+0103     <span class="comment">%% keep the neighbor that is closest (line will go through</span>
+0104     <span class="comment">%% other neighbor afterwards, without changing route).</span>
+0105     <span class="keyword">if</span> (f_connected)&amp;(siml_orient)
+0106         [mn,idx_min] = min(dist_n);
+0107         rel = neighs(idx_min); 
+0108     <span class="keyword">end</span>
+0109 
+0110     <span class="comment">%% case 2: 4-connected, vertical orientations-&gt; fork</span>
+0111     <span class="comment">%% 0 1</span>
+0112     <span class="comment">%% 1 1</span>
+0113     <span class="comment">%% 0 1</span>
+0114     <span class="comment">%% not implemented yet</span>
+0115 
+0116     
+0117     <span class="comment">%% case 3: 8-connected  -&gt; fork</span>
+0118     <span class="comment">%% 0 1</span>
+0119     <span class="comment">%% 1 0</span>
+0120     <span class="comment">%% 0 1</span>
+0121     <span class="comment">%% keep the most active neighbor (naive heuristic)</span>
+0122     
+0123     <span class="keyword">if</span> (~siml_orient)|(~f_connected)
+0124         [mx,idx_max] = max(ener_n);
+0125         rel = neighs(idx_max);
+0126     <span class="keyword">end</span>    
+0127     relative(index) = neigh_ind(rel,index);
+0128 <span class="keyword">end</span>
+0129 
+0130 <span class="comment">%%-------------------------------------------------------------</span>
+0131 <span class="comment">%% internal functions</span>
+0132 <span class="comment">%%-------------------------------------------------------------</span>
+0133 <a name="_sub1" href="#_subfunctions" class="code">function res = ismember2(input,options),</a>
+0134 res = (input == options(1))||(input==options(2));
+0135 
+0136 <a name="_sub2" href="#_subfunctions" class="code">function varargout = keep_points_double(pts,varargin);</a>
+0137 <span class="keyword">for</span> k=1:length(varargin)
+0138     varargout{k} = varargin{k}(:,pts);
+0139 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

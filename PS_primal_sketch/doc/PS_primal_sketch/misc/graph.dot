@@ -1,0 +1,15 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  keep_points -> keep_points;
+  pick_ps_point -> keep_points;
+
+  clip [URL="clip.html"];
+  compress_structure [URL="compress_structure.html"];
+  dist2 [URL="dist2.html"];
+  expand_structure [URL="expand_structure.html"];
+  expand_varargin [URL="expand_varargin.html"];
+  keep_points [URL="keep_points.html"];
+  my_sign [URL="my_sign.html"];
+  pick_ps_point [URL="pick_ps_point.html"];
+  pow_2 [URL="pow_2.html"];
+}

@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of show_intermediate_curves_on_image</title>
+  <meta name="keywords" content="show_intermediate_curves_on_image">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">viz</a> &gt; show_intermediate_curves_on_image.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\viz&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>show_intermediate_curves_on_image
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function show_intermediate_curves_on_image(input_image,tokens,color) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../PS_primal_sketch/PSzz_raw_information.html" class="code" title="function  [crd_x,crd_y,energy,scale]  = PSzz_raw_information(sketch,k);">PSzz_raw_information</a>	[crd_x,crd_y,energy,width]  = PSzz__raw_information(sketch,k);</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../PS_primal_sketch/demo3.html" class="code" title="">demo3</a>	% A demonstration of the intermediate</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function show_intermediate_curves_on_image(input_image,tokens,color)</a>
+0002 <span class="keyword">if</span> nargin==2,
+0003     color = <span class="string">'r'</span>;
+0004 <span class="keyword">end</span>
+0005 <span class="keyword">if</span> ~isempty(input_image),
+0006     imshow(input_image)
+0007 <span class="keyword">end</span>
+0008 lines = tokens.lines;
+0009 nlines = length(lines);
+0010 <span class="keyword">for</span> k_ind = 1:nlines,
+0011     hold on,
+0012     [crd_x,crd_y,energy,width]  = <a href="../../PS_primal_sketch/PSzz_raw_information.html" class="code" title="function  [crd_x,crd_y,energy,scale]  = PSzz_raw_information(sketch,k);">PSzz_raw_information</a>(tokens,k_ind);
+0013     plot(crd_x(2:end-1),crd_y(2:end-1),color,<span class="string">'linewidth'</span>,2);
+0014     hold on,
+0015     scatter(crd_x(1),crd_y(1),16,<span class="string">'k'</span>,<span class="string">'filled'</span>);
+0016     hold on,
+0017     scatter(crd_x(end),crd_y(end),16,<span class="string">'k'</span>,<span class="string">'filled'</span>);
+0018 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

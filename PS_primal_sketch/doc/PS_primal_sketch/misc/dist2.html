@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of dist2</title>
+  <meta name="keywords" content="dist2">
+  <meta name="description" content="DIST2	Calculates squared distance between two sets of points.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">misc</a> &gt; dist2.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\misc&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>dist2
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>DIST2	Calculates squared distance between two sets of points.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function n2 = dist2(x, c) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment">DIST2    Calculates squared distance between two sets of points.
+
+    Description
+    D = DIST2(X, C) takes two matrices of vectors and calculates the
+    squared Euclidean distance between them.  Both matrices must be of
+    the same column dimension.  If X has M rows and N columns, and C has
+    L rows and N columns, then the result has M rows and L columns.  The
+    I, Jth entry is the  squared distance from the Ith row of X to the
+    Jth row of C.
+
+    See also
+    GMMACTIV, KMEANS, RBFFWD</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../PS_primal_sketch/PS2z2__discard_overlapping.html" class="code" title="function  res=  PSPz2_discard_overlapping(input_points,threshold);">PS2z2__discard_overlapping</a>	res=  PSPz3_discard_overlapping(input_points,threshold)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function n2 = dist2(x, c)</a>
+0002 <span class="comment">%DIST2    Calculates squared distance between two sets of points.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%    Description</span>
+0005 <span class="comment">%    D = DIST2(X, C) takes two matrices of vectors and calculates the</span>
+0006 <span class="comment">%    squared Euclidean distance between them.  Both matrices must be of</span>
+0007 <span class="comment">%    the same column dimension.  If X has M rows and N columns, and C has</span>
+0008 <span class="comment">%    L rows and N columns, then the result has M rows and L columns.  The</span>
+0009 <span class="comment">%    I, Jth entry is the  squared distance from the Ith row of X to the</span>
+0010 <span class="comment">%    Jth row of C.</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%    See also</span>
+0013 <span class="comment">%    GMMACTIV, KMEANS, RBFFWD</span>
+0014 <span class="comment">%</span>
+0015 
+0016 <span class="comment">%    Copyright (c) Christopher M Bishop, Ian T Nabney (1996, 1997)</span>
+0017 
+0018 [ndata, dimx] = size(x);
+0019 [ncentres, dimc] = size(c);
+0020 <span class="keyword">if</span> dimx ~= dimc
+0021     error(<span class="string">'Data dimension does not match dimension of centres'</span>)
+0022 <span class="keyword">end</span>
+0023 
+0024 n2 = (ones(ncentres, 1) * sum((x.^2)', 1))' + <span class="keyword">...</span>
+0025           ones(ndata, 1) * sum((c.^2)',1) - <span class="keyword">...</span>
+0026           2.*(x*(c'));
+0027</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

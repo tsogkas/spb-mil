@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PS1z3b_maxalong_orientation</title>
+  <meta name="keywords" content="PS1z3b_maxalong_orientation">
+  <meta name="description" content="[ismax,ismin] = PS1z3b_maxalong_orientation(derivstr,cos_eig,sin_eig,L_1,L_2)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PS1z3b_maxalong_orientation.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PS1z3b_maxalong_orientation
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[ismax,ismin] = PS1z3b_maxalong_orientation(derivstr,cos_eig,sin_eig,L_1,L_2)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function   [ismax,ismin] = PS1z3b_maxalong_orientation(derivstr,cos_eig,sin_eig,L_1,L_2); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [ismax,ismin] = PS1z3b_maxalong_orientation(derivstr,cos_eig,sin_eig,L_1,L_2)
+
+ Finds ridges and edges of image.
+ INPUT: 
+   derivstr: structure containing image derivatives up to 2nd order
+   cos_eig,sin_eig: elements of the largest eigenvector of the Hessian
+    L_1, L_2: eigenvalues of the Hessian. 
+ OUTPUT: 
+   ismax: indicator function of valleys
+   ismin: indicator function of ridges
+ 
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS1z3__get_feature_strength.html" class="code" title="function [feat_strength_selection,feat_saliency,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch);">PS1z3__get_feature_strength</a>	[feat_strength_selection,feat_saliency,sc_min,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch)</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function   [zc_hs,zc_vs] = find_orientation_ambiguity(im_an);</a></li><li><a href="#_sub2" class="code">function [shift_up,shift_left] = shift_matrix_up_left(inp);</a></li></ul>
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function   [ismax,ismin] = PS1z3b_maxalong_orientation(derivstr,cos_eig,sin_eig,L_1,L_2);</a>
+0002 <span class="comment">% [ismax,ismin] = PS1z3b_maxalong_orientation(derivstr,cos_eig,sin_eig,L_1,L_2)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Finds ridges and edges of image.</span>
+0005 <span class="comment">% INPUT:</span>
+0006 <span class="comment">%   derivstr: structure containing image derivatives up to 2nd order</span>
+0007 <span class="comment">%   cos_eig,sin_eig: elements of the largest eigenvector of the Hessian</span>
+0008 <span class="comment">%    L_1, L_2: eigenvalues of the Hessian.</span>
+0009 <span class="comment">% OUTPUT:</span>
+0010 <span class="comment">%   ismax: indicator function of valleys</span>
+0011 <span class="comment">%   ismin: indicator function of ridges</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0014 <span class="comment">% 10/10/2007</span>
+0015 
+0016 d_x = derivstr.d_x; d_y = derivstr.d_y;
+0017 <span class="keyword">for</span> it =[0,1],
+0018     im_an = sin_eig;
+0019     <span class="keyword">if</span> it ==0,
+0020         <span class="comment">%% it =0:  bright features (ridges)-&gt; find zero-crossings of derivative</span>
+0021         <span class="comment">%% along the orientation perpendicular to [cos_hessian,sin_hessian],</span>
+0022         <span class="comment">%% and require that second derivative is negative (maximum condition)</span>
+0023         cos_ang = - sin_eig;
+0024         sin_ang =   cos_eig;
+0025         cond = L_1&lt;=0;
+0026     <span class="keyword">else</span>
+0027         <span class="comment">%% it =1:  dark features (valleys)-&gt; take derivative along</span>
+0028         <span class="comment">%% along  [cos_hessian,sin_hessian],</span>
+0029         <span class="comment">%% and require that second derivative is positive (minimum condition)</span>
+0030         cos_ang = cos_eig;
+0031         sin_ang = sin_eig;
+0032         cond =  L_2&gt;=0;
+0033     <span class="keyword">end</span>
+0034     
+0035     <span class="comment">%% locate the image locations where sin_ang changes sign</span>
+0036     <span class="comment">%% due to the orientation ambiguity (look below for details)</span>
+0037     [zc_hs,zc_vs] = <a href="#_sub1" class="code" title="subfunction   [zc_hs,zc_vs] = find_orientation_ambiguity(im_an);">find_orientation_ambiguity</a>(im_an);
+0038 
+0039     <span class="comment">%% form directional derivative</span>
+0040     im_dr = (cos_ang.*d_x + sin_ang.*d_y);
+0041     
+0042     <span class="comment">%% find vertical/horizontal zero crossings of im_dr</span>
+0043     <span class="comment">%% by fetching the values of neighboring points</span>
+0044     [shift_dr_up,shift_dr_left] =  <a href="#_sub2" class="code" title="subfunction [shift_up,shift_left] = shift_matrix_up_left(inp);">shift_matrix_up_left</a>(im_dr);
+0045 
+0046     <span class="comment">%% for locations with {-1/1} sin_ang changes,</span>
+0047     <span class="comment">%% invert derivative sing for neighboring points</span>
+0048     shift_dr_up   = shift_dr_up.*(1- 2*zc_vs);
+0049     shift_dr_left = shift_dr_left.*(1- 2*zc_hs);
+0050     
+0051     <span class="comment">%% find locations where the derivative changes sign</span>
+0052     zc_v  = shift_dr_up.*im_dr&lt;0;
+0053     zc_h  = shift_dr_left.*im_dr&lt;0;
+0054 
+0055     zc_locations  = (zc_h|zc_v);
+0056     <span class="keyword">if</span> it==0,
+0057         ismax = (zc_locations).*cond;
+0058     <span class="keyword">else</span>
+0059         ismin = (zc_locations).*cond;
+0060     <span class="keyword">end</span>
+0061 <span class="keyword">end</span>
+0062 
+0063 <a name="_sub1" href="#_subfunctions" class="code">function   [zc_hs,zc_vs] = find_orientation_ambiguity(im_an);</a>
+0064 <span class="comment">%% a small patch that fixes the problem of orientation ambiguity:</span>
+0065 <span class="comment">%% Observe that around -1/1 sin_eig may change abruptly, even though the orientation</span>
+0066 <span class="comment">%% does not really change</span>
+0067 <span class="comment">%% ( [-1,0] and [1,0] encode the same orientation, but with different direction)</span>
+0068 <span class="comment">%% For this we directly find locations where this happens, by identifying</span>
+0069 <span class="comment">%% zero crossings of sin_eig, and keeping those where sin_eig has large</span>
+0070 <span class="comment">%% magnitude. The rest (sin_eig~=0) are natural.</span>
+0071 <span class="comment">%% zc_vs, zc_hs thus indicate whether a vertical/horizontal zero crossing</span>
+0072 <span class="comment">%% of sin_eig is an artifact of this ambiguity.</span>
+0073 
+0074 [shift_an_up,shift_an_left] =  <a href="#_sub2" class="code" title="subfunction [shift_up,shift_left] = shift_matrix_up_left(inp);">shift_matrix_up_left</a>(im_an);
+0075 zc_vs = ((shift_an_up.*im_an)&lt;0);
+0076 zc_vs = zc_vs&amp;(abs(im_an)&gt;.8);
+0077 zc_hs = ((shift_an_left.*im_an)&lt;0);
+0078 zc_hs = zc_hs&amp;(abs(im_an)&gt;.8);
+0079 
+0080 <a name="_sub2" href="#_subfunctions" class="code">function [shift_up,shift_left] = shift_matrix_up_left(inp);</a>
+0081 [sz_m,sz_n]  = size(inp);
+0082 shift_up    =  [[inp(2:<span class="keyword">end</span>,1:<span class="keyword">end</span>,:)];zeros(1,sz_n)];
+0083 shift_left  =  [[inp(1:<span class="keyword">end</span>,2:<span class="keyword">end</span>,:),zeros(sz_m,1)]];
+0084</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

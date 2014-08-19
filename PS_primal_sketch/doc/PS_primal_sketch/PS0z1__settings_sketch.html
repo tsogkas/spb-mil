@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PS0z1__settings_sketch</title>
+  <meta name="keywords" content="PS0z1__settings_sketch">
+  <meta name="description" content="settings_sketch_in = PS0z1__settings_sketch(input_image,settings_sketch_in)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PS0z1__settings_sketch.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PS0z1__settings_sketch
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>settings_sketch_in = PS0z1__settings_sketch(input_image,settings_sketch_in)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function settings_sketch_out = PS0z1__settings_sketch(input_image,settings_sketch_in); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> settings_sketch_in = PS0z1__settings_sketch(input_image,settings_sketch_in)
+
+ Sets default fields for primal sketch computation.
+ If settings_sketch_in is not empty, defaults are overriden by
+ settings_sketch_in fields.
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../PS_primal_sketch/misc/compress_structure.html" class="code" title="">compress_structure</a>	</li><li><a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS00___primal_sketch.html" class="code" title="function [ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests);">PS00___primal_sketch</a>	[ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function settings_sketch_out = PS0z1__settings_sketch(input_image,settings_sketch_in);</a>
+0002 <span class="comment">% settings_sketch_in = PS0z1__settings_sketch(input_image,settings_sketch_in)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Sets default fields for primal sketch computation.</span>
+0005 <span class="comment">% If settings_sketch_in is not empty, defaults are overriden by</span>
+0006 <span class="comment">% settings_sketch_in fields.</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0009 <span class="comment">% 10/10/2007</span>
+0010 
+0011 <span class="comment">%%-------------------------------------------------------------------</span>
+0012 <span class="comment">%% settings for primal sketch extraction</span>
+0013 <span class="comment">%%-------------------------------------------------------------------</span>
+0014 
+0015 <span class="comment">%%------------------------------------------------------------------</span>
+0016 <span class="comment">%% 1. Setup default choices for primal sketch scale space</span>
+0017 <span class="comment">%%------------------------------------------------------------------</span>
+0018 
+0019 <span class="comment">%% starting &amp; ending scales, and scale spacing</span>
+0020 min_scale = max(min(size(input_image))/200,.5);
+0021 max_scale = min(size(input_image))/4;
+0022 nscales   = 40;
+0023 linear_spacing = 1;
+0024 
+0025 <span class="comment">%% determines whether the dll implementing Deriche's iir gaussian filter &amp;</span>
+0026 <span class="comment">%% derivatives is used</span>
+0027 use_iir  = 1;
+0028 
+0029 <span class="comment">%% scale normalization for ridges (check Lindeberg's paper)</span>
+0030 norm_r = <span class="string">'A'</span>;
+0031 gamma_n_ridge = 3/4;
+0032 gamma_n_edge  = 1/2;
+0033 
+0034 <span class="comment">%% determines which of the scale space images we will be returning</span>
+0035 <span class="comment">%% code is : [ridge,edge,blob,image]</span>
+0036 keep_scale_space_im = [0,0,0,0];
+0037 
+0038 <span class="comment">%%------------------------------------------------------------------</span>
+0039 <span class="comment">%% 2. override defaults settings</span>
+0040 <span class="comment">%%------------------------------------------------------------------</span>
+0041 <span class="keyword">if</span> ~isempty(settings_sketch_in),
+0042     structure = settings_sketch_in; <a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>;
+0043 <span class="keyword">end</span>
+0044 
+0045 <span class="keyword">if</span> linear_spacing,
+0046     scales_wt = linspace(min_scale,max_scale,nscales);
+0047 <span class="keyword">else</span>
+0048     scales_wt = logspace(log10(min_scale),log10(max_scale),nscales);
+0049 <span class="keyword">end</span>
+0050     
+0051 fields_wt = {<span class="string">'norm_r'</span>,<span class="string">'min_scale'</span>,<span class="string">'max_scale'</span>,<span class="string">'gamma_n_ridge'</span>,<span class="string">'gamma_n_edge'</span>,<span class="string">'scales_wt'</span>,<span class="string">'use_iir'</span>,<span class="string">'keep_scale_space_im'</span>};
+0052 <a href="../PS_primal_sketch/misc/compress_structure.html" class="code" title="">compress_structure</a>;
+0053 settings_sketch_out = structure;</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PSLz1__preprocess_points</title>
+  <meta name="keywords" content="PSLz1__preprocess_points">
+  <meta name="description" content="[points,contours]   = PSLz1__preprocess_points(points,imsize)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PSLz1__preprocess_points.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PSLz1__preprocess_points
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[points,contours]   = PSLz1__preprocess_points(points,imsize)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [points,contours]   = PSLz1__preprocess_points(points,imsize); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [points,contours]   = PSLz1__preprocess_points(points,imsize)
+ 
+ Takes the set of points delivered by the primal sketch code, and
+ (a) removes weaker points lying on the same location with other, stronger points 
+ (b) processes  the set of contour locations (morphological thinning) and
+     removes unnecessary points 
+ (c) returns the matrix indexes of contour locations.
+ 
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSLz1a_isolate_same_location.html" class="code" title="function points_kept = PSLz1a_isolate_same_location(points,size_m);">PSLz1a_isolate_same_location</a>	points_kept = PSLz1a_isolate_same_location(points,size_m)</li><li><a href="PSLz1b_feature_matrices.html" class="code" title="function [points,skel,ener,scales,orient] = PSLz2_construct_matrices(points,imsize);">PSLz1b_feature_matrices</a>	[pointsskel,ener,scales,orient] = PSLz2_construct_matrices(points,imsize)</li><li><a href="PSzz_zip_contour.html" class="code" title="function res = PSzz_zip_skeleton(skeleton,orien,scl,ener);">PSzz_zip_contour</a>	res = PSzz_zip_skeleton(skeleton,orien,scl,ener)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSL____line_tokens.html" class="code" title="function [line_features,contours,components] = PSL____line_tokens(points,imsize,thresh_line_ener);">PSL____line_tokens</a>	[line_features,contour,components] = PSL____line_tokens(edge_points,imsize,thresh_line_ener)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [points,contours]   = PSLz1__preprocess_points(points,imsize);</a>
+0002 <span class="comment">% [points,contours]   = PSLz1__preprocess_points(points,imsize)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Takes the set of points delivered by the primal sketch code, and</span>
+0005 <span class="comment">% (a) removes weaker points lying on the same location with other, stronger points</span>
+0006 <span class="comment">% (b) processes  the set of contour locations (morphological thinning) and</span>
+0007 <span class="comment">%     removes unnecessary points</span>
+0008 <span class="comment">% (c) returns the matrix indexes of contour locations.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0011 <span class="comment">% 10/10/2007</span>
+0012 
+0013 points                           = <a href="PSLz1a_isolate_same_location.html" class="code" title="function points_kept = PSLz1a_isolate_same_location(points,size_m);">PSLz1a_isolate_same_location</a>(points,imsize(1));
+0014 [points,skel,ener,scales,orient] = <a href="PSLz1b_feature_matrices.html" class="code" title="function [points,skel,ener,scales,orient] = PSLz2_construct_matrices(points,imsize);">PSLz1b_feature_matrices</a>(points,imsize);
+0015 contours                         = <a href="PSzz_zip_contour.html" class="code" title="function res = PSzz_zip_skeleton(skeleton,orien,scl,ener);">PSzz_zip_contour</a>(skel,(skel.*orient),(skel.*scales),(skel.*ener));</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

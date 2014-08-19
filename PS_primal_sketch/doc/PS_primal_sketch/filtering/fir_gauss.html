@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fir_gauss</title>
+  <meta name="keywords" content="fir_gauss">
+  <meta name="description" content="% code for convolution with separable Gaussian and DoG filters.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">filtering</a> &gt; fir_gauss.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\filtering&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>fir_gauss
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>% code for convolution with separable Gaussian and DoG filters.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [im_sc,d_x,d_xx,d_y,d_yy,d_xy] = fir_gauss(L_in,scale); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% code for convolution with separable Gaussian and DoG filters.
+% Slow, but controllable alternative to iir filtering.
+% 
+% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="filter1.html" class="code" title="function res= filter1(filt,input,dim,patch_size);">filter1</a>	</li><li><a href="peel.html" class="code" title="function peeled  = peel(input,patch_size,p_s_2,p_s_3,p_s_4,inverse);">peel</a>	</li><li><a href="wrap_e.html" class="code" title="function  ewrap = wrap_e(e_mn,maxwrap);">wrap_e</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../PS_primal_sketch/PS1z2__get_gaussian_jet.html" class="code" title="function [gauss_jet] = PS1z2__get_gaussian_jet(input_image,scale_gauss,use_iir);">PS1z2__get_gaussian_jet</a>	[gauss_jet] = PS1z2__get_gaussian_jet(input_image,scale_gauss,use_iir)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [im_sc,d_x,d_xx,d_y,d_yy,d_xy] = fir_gauss(L_in,scale);</a>
+0002 <span class="comment">%% code for convolution with separable Gaussian and DoG filters.</span>
+0003 <span class="comment">%% Slow, but controllable alternative to iir filtering.</span>
+0004 <span class="comment">%%</span>
+0005 <span class="comment">%% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0006 
+0007 scale_m =  ceil(4*scale);
+0008 L_t = <a href="wrap_e.html" class="code" title="function  ewrap = wrap_e(e_mn,maxwrap);">wrap_e</a>(L_in,scale_m);
+0009 domain = [-scale_m:scale_m];
+0010 
+0011 gauss       = 1/(sqrt(2*pi)*scale)*(exp( - domain.^2/(2*scale^2)));
+0012 gauss_d     = -(gauss.*(-domain/(scale^2)));
+0013 gauss_dd    = ((-1/scale^2).*gauss + (domain.^2/scale^4).*gauss);
+0014 
+0015 filt_v_smooth  =  <a href="filter1.html" class="code" title="function res= filter1(filt,input,dim,patch_size);">filter1</a>(gauss,L_t,1,scale_m);
+0016 filt_h_smooth  =  <a href="filter1.html" class="code" title="function res= filter1(filt,input,dim,patch_size);">filter1</a>(gauss,L_t,2,scale_m);
+0017 
+0018 im_sc   =  <a href="peel.html" class="code" title="function peeled  = peel(input,patch_size,p_s_2,p_s_3,p_s_4,inverse);">peel</a>(<a href="filter1.html" class="code" title="function res= filter1(filt,input,dim,patch_size);">filter1</a>(gauss,filt_h_smooth,1,scale_m),scale_m);
+0019 d_x     =  <a href="peel.html" class="code" title="function peeled  = peel(input,patch_size,p_s_2,p_s_3,p_s_4,inverse);">peel</a>(<a href="filter1.html" class="code" title="function res= filter1(filt,input,dim,patch_size);">filter1</a>(gauss_d,filt_v_smooth,2,scale_m),scale_m);
+0020 d_y     =  <a href="peel.html" class="code" title="function peeled  = peel(input,patch_size,p_s_2,p_s_3,p_s_4,inverse);">peel</a>(<a href="filter1.html" class="code" title="function res= filter1(filt,input,dim,patch_size);">filter1</a>(gauss_d,filt_h_smooth,1,scale_m),scale_m);
+0021 d_xx    =  <a href="peel.html" class="code" title="function peeled  = peel(input,patch_size,p_s_2,p_s_3,p_s_4,inverse);">peel</a>(<a href="filter1.html" class="code" title="function res= filter1(filt,input,dim,patch_size);">filter1</a>(gauss_dd  ,filt_v_smooth,2,scale_m),scale_m);
+0022 d_yy    =  <a href="peel.html" class="code" title="function peeled  = peel(input,patch_size,p_s_2,p_s_3,p_s_4,inverse);">peel</a>(<a href="filter1.html" class="code" title="function res= filter1(filt,input,dim,patch_size);">filter1</a>(gauss_dd  ,filt_h_smooth,1,scale_m),scale_m);
+0023 d_xy    =  <a href="peel.html" class="code" title="function peeled  = peel(input,patch_size,p_s_2,p_s_3,p_s_4,inverse);">peel</a>(<a href="filter1.html" class="code" title="function res= filter1(filt,input,dim,patch_size);">filter1</a>(gauss_d,<a href="filter1.html" class="code" title="function res= filter1(filt,input,dim,patch_size);">filter1</a>(gauss_d,L_t,1,scale_m),2,scale_m),scale_m);
+0024</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

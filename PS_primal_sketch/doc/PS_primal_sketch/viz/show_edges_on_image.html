@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of show_edges_on_image</title>
+  <meta name="keywords" content="show_edges_on_image">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">viz</a> &gt; show_edges_on_image.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\viz&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>show_edges_on_image
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function show_ridges_on_image(input_image,keyps,sc_k,selection,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>	</li><li><a href="../../PS_primal_sketch/misc/expand_varargin.html" class="code" title="">expand_varargin</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../PS_primal_sketch/demo1.html" class="code" title="">demo1</a>	% Basic primal sketch demo:</li><li><a href="../../PS_primal_sketch/demo2.html" class="code" title="">demo2</a>	% Shows how to override the standard settings</li><li><a href="../../PS_primal_sketch/demo3.html" class="code" title="">demo3</a>	% A demonstration of the intermediate</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function show_ridges_on_image(input_image,keyps,sc_k,selection,varargin)</a>
+0002 color_ell = [1,0,0];
+0003 color_arr = <span class="string">'g'</span>;
+0004 lw = 5;
+0005 <span class="keyword">if</span> ~isempty(input_image),
+0006     imshow(input_image)
+0007 <span class="keyword">end</span>
+0008 <span class="keyword">if</span> ~isempty(varargin),
+0009     <a href="../../PS_primal_sketch/misc/expand_varargin.html" class="code" title="">expand_varargin</a>;
+0010 <span class="keyword">end</span>
+0011 structure = keyps; <a href="../../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>;
+0012 
+0013 sz = 10;
+0014 pt_x_along = [-sz:sz]/(sz);
+0015 pt_y_along_1 = zeros(size(pt_x_along));
+0016 pt_y_along_2 = ones(size(pt_x_along));
+0017 pt_y_along_3 = -ones(size(pt_x_along));
+0018 
+0019 pt_y_across = [-sz:sz]/(sz);
+0020 pt_x_across_1 = ones(size(pt_y_across));
+0021 pt_x_across_2 = -ones(size(pt_y_across));
+0022 
+0023 <span class="keyword">if</span> (nargin &lt;4)|isempty(selection)
+0024     selection = 1:length(c_m);
+0025 <span class="keyword">end</span>
+0026 <span class="keyword">try</span> sc_k = sc_k; <span class="keyword">catch</span> sc_k  = 1; <span class="keyword">end</span>
+0027 c_m  =round(c_m); c_n = round(c_n);
+0028 <span class="keyword">for</span> k_ind= 1:length(selection),
+0029     k  = selection(k_ind);
+0030     orn = orientations(k);
+0031     sc =  scales(k);
+0032     <span class="keyword">try</span>,
+0033         ratio = ratios(k);
+0034     <span class="keyword">catch</span>
+0035         ratio =1;
+0036     <span class="keyword">end</span>
+0037     orn  = orn;
+0038     pts_x_along = (pt_x_along)*sc;
+0039     pts_y_along_1 = (pt_y_along_1)*ratio*sc;
+0040     pts_y_along_2 = (pt_y_along_2)*ratio*sc;
+0041     pts_y_along_3 = (pt_y_along_3)*ratio*sc;
+0042     pts_y_across = (pt_y_across)*ratio*sc;
+0043     pts_x_across_1 = (pt_x_across_1)*sc;
+0044     pts_x_across_2 = (pt_x_across_2)*sc;
+0045     
+0046     rotation = [cos(orn),-sin(orn);sin(orn),cos(orn)];
+0047     center = [c_n(k);c_m(k)];
+0048     hold on;
+0049     pts_xs_along_1 =  center(1) + rotation(1,1)*pts_x_along +  rotation(1,2)*pts_y_along_1;
+0050     pts_xs_along_2 =  center(1) + rotation(1,1)*pts_x_along +  rotation(1,2)*pts_y_along_2;
+0051     pts_xs_along_3 =  center(1) + rotation(1,1)*pts_x_along +  rotation(1,2)*pts_y_along_3;
+0052     
+0053     pts_ys_along_1 =  center(2) + rotation(2,1)*pts_x_along +  rotation(2,2)*pts_y_along_1;
+0054     pts_ys_along_2 =  center(2) + rotation(2,1)*pts_x_along +  rotation(2,2)*pts_y_along_2;
+0055     pts_ys_along_3 =  center(2) + rotation(2,1)*pts_x_along +  rotation(2,2)*pts_y_along_3;
+0056 
+0057    
+0058     pts_xs_across_1 =  center(1) + rotation(1,1)*pts_x_across_1 +  rotation(1,2)*pts_y_across;
+0059     pts_xs_across_2 =  center(1) + rotation(1,1)*pts_x_across_2 +  rotation(1,2)*pts_y_across;
+0060     pts_ys_across_1 =  center(2) + rotation(2,1)*pts_x_across_1 +  rotation(2,2)*pts_y_across;
+0061     pts_ys_across_2 =  center(2) + rotation(2,1)*pts_x_across_2 +  rotation(2,2)*pts_y_across;
+0062     
+0063     h_i1=  line(pts_xs_along_1,pts_ys_along_1);
+0064     <span class="comment">%h_i2=  line(pts_xs_along_2,pts_ys_along_2);</span>
+0065     <span class="comment">%h_i3=  line(pts_xs_along_3,pts_ys_along_3);</span>
+0066     
+0067     h_o1=  line(pts_xs_across_1,pts_ys_across_1);
+0068     h_o2=  line(pts_xs_across_2,pts_ys_across_2);
+0069     
+0070     <span class="comment">%h = my_draw_ellipse(center,rotation,diag(eigs));</span>
+0071     
+0072     set(h_i1,<span class="string">'color'</span>,color_arr,<span class="string">'linewidth'</span>,lw);
+0073     <span class="comment">%set(h_i2,'color',color_ell,'linewidth',lw);</span>
+0074     <span class="comment">%set(h_i3,'color',color_ell,'linewidth',lw);</span>
+0075     set(h_o1,<span class="string">'color'</span>,color_ell,<span class="string">'linewidth'</span>,lw);
+0076     set(h_o2,<span class="string">'color'</span>,color_ell,<span class="string">'linewidth'</span>,lw);   
+0077     hold on;
+0078     h = text(c_n(k),c_m(k),sprintf(<span class="string">'%i'</span>,selection(k_ind)));
+0079     <span class="comment">%set(h,'linewidth',3);</span>
+0080 <span class="comment">%    h = text(c_n(k),c_m(1,k),sprintf('%i',idxs(k)));</span>
+0081 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

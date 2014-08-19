@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PSLz2cI_track_curve</title>
+  <meta name="keywords" content="PSLz2cI_track_curve">
+  <meta name="description" content="[passed,string_str,ener_str,scale_str] = PSLz2cI_track_curve(index_start,passed,indexes,ener,scl,lookup,succ,pred,iters)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PSLz2cI_track_curve.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PSLz2cI_track_curve
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[passed,string_str,ener_str,scale_str] = PSLz2cI_track_curve(index_start,passed,indexes,ener,scl,lookup,succ,pred,iters)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function    [passed,string_str,ener_str,scale_str] = PSLz2cI_track_curve(index_start,passed,indexes,ener,scl,lookup,succ,pred,iters); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [passed,string_str,ener_str,scale_str] = PSLz2cI_track_curve(index_start,passed,indexes,ener,scl,lookup,succ,pred,iters)
+
+ Get continuous curves by hopping from point to point as suggested by the successor/predecessor
+ information. 
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSLz2c_find_connected_curves.html" class="code" title="function string_structure = PSLz2c_find_connected_curves(current,succ,pred);">PSLz2c_find_connected_curves</a>	string_structure = PSLz2c_find_connected_curves(current,succ,pred)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function    [passed,string_str,ener_str,scale_str] = PSLz2cI_track_curve(index_start,passed,indexes,ener,scl,lookup,succ,pred,iters);</a>
+0002 <span class="comment">% [passed,string_str,ener_str,scale_str] = PSLz2cI_track_curve(index_start,passed,indexes,ener,scl,lookup,succ,pred,iters)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Get continuous curves by hopping from point to point as suggested by the successor/predecessor</span>
+0005 <span class="comment">% information.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0008 <span class="comment">% 10/10/2007</span>
+0009 
+0010 ener_temp   = zeros(1,50);
+0011 string_temp = zeros(1,50);
+0012 scale_temp  = zeros(1,50);
+0013 
+0014 string_temp(1) = indexes(index_start);
+0015 ener_temp(1)   = ener(index_start);
+0016 scale_temp(1)  = scl(index_start);
+0017 
+0018 <span class="keyword">for</span> iter =1:iters,
+0019     cnt = 1;
+0020     cont=1;
+0021     index = index_start;
+0022     <span class="comment">%% iter 1: start searching in one direction of starting point</span>
+0023     <span class="comment">%% iter 2: other direction.</span>
+0024     <span class="keyword">while</span> cont
+0025         <span class="comment">%% If we have already started tracking the curve,</span>
+0026         <span class="comment">%% `next_location' should  be the next non-occupied point</span>
+0027         <span class="comment">%% It has nothing to do with `iter' any longer.</span>
+0028         next_location = succ(index);
+0029         <span class="keyword">if</span> (next_location&lt;0|(passed(next_location)==1))
+0030             next_location = pred(index);
+0031         <span class="keyword">end</span>
+0032         t=  indexes(index);
+0033         passed(t) = 1;
+0034 
+0035         <span class="keyword">if</span> (next_location&gt;0)&amp;(passed(next_location)~=1)
+0036             cnt = cnt + 1;
+0037             <span class="comment">%% find next point in line</span>
+0038             index = lookup(next_location);
+0039             string_temp(cnt) = next_location;
+0040             ener_temp(cnt)  = ener(index);
+0041             scale_temp(cnt) = scl(index);
+0042         <span class="keyword">else</span>
+0043             cont = 0;
+0044         <span class="keyword">end</span>
+0045     <span class="keyword">end</span>
+0046 
+0047     <span class="keyword">if</span> iter==1,
+0048         string_str = [string_temp(1:cnt)];
+0049         scale_str  = [scale_temp(1:cnt)];
+0050         ener_str   = [ener_temp(1:cnt)];
+0051     <span class="keyword">else</span>
+0052         string_str = [fliplr(string_temp(2:cnt)),string_str];
+0053         scale_str  = [fliplr(scale_temp(2:cnt)),scale_str];
+0054         ener_str   = [fliplr(ener_temp(2:cnt)),ener_str];
+0055     <span class="keyword">end</span>
+0056 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

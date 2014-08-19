@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of demo2</title>
+  <meta name="keywords" content="demo2">
+  <meta name="description" content="% Shows how to override the standard settings">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; demo2.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>demo2
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% Shows how to override the standard settings</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% Shows how to override the standard settings 
+% for primal sketch computation.
+% Defaults are in PS0z1_settings_sketch and PS0z2_settings_tokens
+% 
+% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS00___primal_sketch.html" class="code" title="function [ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests);">PS00___primal_sketch</a>	[ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests)</li><li><a href="../PS_primal_sketch/viz/show_edges_on_image.html" class="code" title="function show_ridges_on_image(input_image,keyps,sc_k,selection,varargin)">show_edges_on_image</a>	</li><li><a href="../PS_primal_sketch/viz/show_ellipses_on_image.html" class="code" title="function show_ellipses_on_image(input_image,keyps,sc_k,selection,varargin)">show_ellipses_on_image</a>	</li><li><a href="../PS_primal_sketch/viz/show_ridges_on_image.html" class="code" title="function show_ridges_on_image(input_image,keyps,sc_k,selection,varargin)">show_ridges_on_image</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%% Shows how to override the standard settings</span>
+0002 <span class="comment">%% for primal sketch computation.</span>
+0003 <span class="comment">%% Defaults are in PS0z1_settings_sketch and PS0z2_settings_tokens</span>
+0004 <span class="comment">%%</span>
+0005 <span class="comment">%% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0006 
+0007 input_image = double(imread(<span class="string">'horse010.jpg'</span>))/256;
+0008 
+0009 <span class="comment">%% override defaults for primal sketch extraction</span>
+0010 override_sketch.nscales             = 30;  
+0011 override_sketch.linear_spacing      = 0;     <span class="comment">% require geometrical spacing</span>
+0012 override_sketch.min_scale           = .3;
+0013 
+0014 <span class="comment">%% override defaults for criteria used to select token subset</span>
+0015 override_tests.ener_blob_threshold = .2;
+0016 override_tests.ener_edge_threshold = .1;
+0017 
+0018 input_image = double(imread(<span class="string">'horse010.jpg'</span>))/256;
+0019 [ridges,edges,blobs,contours] = <a href="PS00___primal_sketch.html" class="code" title="function [ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests);">PS00___primal_sketch</a>(input_image,override_sketch,override_tests);
+0020 
+0021 <span class="comment">%% show sketch tokens</span>
+0022 figure,
+0023 subplot(2,2,1); <a href="../PS_primal_sketch/viz/show_ridges_on_image.html" class="code" title="function show_ridges_on_image(input_image,keyps,sc_k,selection,varargin)">show_ridges_on_image</a>(input_image,ridges); title(<span class="string">'Ridges'</span>)
+0024 subplot(2,2,2); <a href="../PS_primal_sketch/viz/show_edges_on_image.html" class="code" title="function show_ridges_on_image(input_image,keyps,sc_k,selection,varargin)">show_edges_on_image</a>(input_image,edges);   title(<span class="string">'Edges'</span>);
+0025 subplot(2,2,3); <a href="../PS_primal_sketch/viz/show_ellipses_on_image.html" class="code" title="function show_ellipses_on_image(input_image,keyps,sc_k,selection,varargin)">show_ellipses_on_image</a>(input_image,blobs);title(<span class="string">'Blobs'</span>)
+0026 subplot(2,2,4); imshow(colored_sketch); title(<span class="string">'Ridge and Edge contours'</span>);
+0027 
+0028 
+0029 
+0030</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

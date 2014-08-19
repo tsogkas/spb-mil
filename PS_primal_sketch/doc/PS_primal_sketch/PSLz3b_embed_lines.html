@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PSLz3b_embed_lines</title>
+  <meta name="keywords" content="PSLz3b_embed_lines">
+  <meta name="description" content="line_features = PSLz3b_embed_lines(line_parsing,thresh_line_ener)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PSLz3b_embed_lines.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PSLz3b_embed_lines
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>line_features = PSLz3b_embed_lines(line_parsing,thresh_line_ener)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function line_features = PSLz3b_embed_lines(line_parsing,thresh_line_ener); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> line_features = PSLz3b_embed_lines(line_parsing,thresh_line_ener)
+
+ For each of the straight line tokens, get its pose descriptor and the
+ average strength of the differential operator along its corresponding curve.
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../PS_primal_sketch/misc/clip.html" class="code" title="function res = clip(input,bot,top)">clip</a>	</li><li><a href="../PS_primal_sketch/misc/compress_structure.html" class="code" title="">compress_structure</a>	</li><li><a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSL____line_tokens.html" class="code" title="function [line_features,contours,components] = PSL____line_tokens(points,imsize,thresh_line_ener);">PSL____line_tokens</a>	[line_features,contour,components] = PSL____line_tokens(edge_points,imsize,thresh_line_ener)</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function    theta = get_orientation(pts,mean_c_x,mean_c_y);</a></li></ul>
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function line_features = PSLz3b_embed_lines(line_parsing,thresh_line_ener);</a>
+0002 <span class="comment">% line_features = PSLz3b_embed_lines(line_parsing,thresh_line_ener)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% For each of the straight line tokens, get its pose descriptor and the</span>
+0005 <span class="comment">% average strength of the differential operator along its corresponding curve.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0008 <span class="comment">% 10/10/2007</span>
+0009 
+0010 lines = line_parsing.lines;
+0011 merit_geom = line_parsing.merit_geom;
+0012 line_count = 0;
+0013 lines_kept = [];
+0014 
+0015 <span class="keyword">for</span> cnt=1:length(lines), 
+0016     pts = lines{cnt};
+0017     idxs = pts(3,:);
+0018 
+0019     ener_wt = median(pts(4,:));
+0020     <span class="keyword">if</span> (ener_wt&gt;thresh_line_ener),
+0021         line_count = line_count+1;
+0022 
+0023         lines_kept=  [lines_kept,cnt];
+0024         
+0025         ener(line_count) =  ener_wt;        
+0026         c_m(line_count)  = mean(pts(1,:));
+0027         c_n(line_count)  = mean(pts(2,:));
+0028         scales(line_count) = sqrt(sum((pts(1:2,1) - pts(1:2,end)).^2))/2;            
+0029         orientations(line_count)=  <a href="#_sub1" class="code" title="subfunction    theta = get_orientation(pts,mean_c_x,mean_c_y);">get_orientation</a>(pts,c_m(line_count),c_n(line_count));
+0030 
+0031         scales_clipped =  <a href="../PS_primal_sketch/misc/clip.html" class="code" title="function res = clip(input,bot,top)">clip</a>(pts(5,:),.01,inf);
+0032         ratios(line_count) = exp(mean(log(scales_clipped)))/max(scales(line_count),1);        
+0033     <span class="keyword">end</span>
+0034 <span class="keyword">end</span>
+0035 
+0036 fields_wt = fieldnames(line_parsing);
+0037 <span class="keyword">for</span> k=1:length(fields_wt),
+0038     eval(sprintf(<span class="string">'%s = %s(lines_kept);'</span>,fields_wt{k},fields_wt{k}));
+0039 <span class="keyword">end</span>
+0040 
+0041 fields_wt = [fields_wt(:)',{<span class="string">'orientations'</span>,<span class="string">'ratios'</span>,<span class="string">'scales'</span>,<span class="string">'c_m'</span>,<span class="string">'c_n'</span>,<span class="string">'ener'</span>}];
+0042 <a href="../PS_primal_sketch/misc/compress_structure.html" class="code" title="">compress_structure</a>;    
+0043 line_features = structure;
+0044 
+0045 <a name="_sub1" href="#_subfunctions" class="code">function    theta = get_orientation(pts,mean_c_x,mean_c_y);</a>
+0046 <span class="comment">%% form least squares approximation</span>
+0047 <span class="comment">%% to the points belonging to the line</span>
+0048 <span class="comment">%% and use the parameters to determine the angle's orientation</span>
+0049 c_x = pts(1,:);
+0050 c_y = pts(2,:);
+0051 c_x_2= <a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(c_x);
+0052 c_y_2 = <a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(c_y);
+0053 
+0054 mean_c_x_2 = mean(c_x_2);
+0055 mean_c_y_2 = mean(c_y_2);
+0056 mean_c_xy = mean(c_x.*c_y);
+0057 
+0058 pow_2_mcx = mean_c_x*mean_c_x;
+0059 pow_2_mcy = mean_c_y*mean_c_y;
+0060 
+0061 design(1,1) = mean_c_x_2 - pow_2_mcx;
+0062 design(1,2) = mean_c_xy - mean_c_x*mean_c_y;
+0063 design(2,1) = design(1,2);
+0064 design(2,2) = mean_c_y_2 - pow_2_mcy;
+0065 
+0066 [eigv,t] = eig(design);
+0067 theta = atan2(-eigv(2,1),eigv(1,1));
+0068 
+0069 
+0070</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

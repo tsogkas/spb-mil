@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PSL____point_tokens</title>
+  <meta name="keywords" content="PSL____point_tokens">
+  <meta name="description" content="[points] =point_features(points_kept,imsize)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PSL____point_tokens.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PSL____point_tokens
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[points] =point_features(points_kept,imsize)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function  [points] =point_features(points_kept,imsize); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [points] =point_features(points_kept,imsize)
+
+ Converts point structure returned by PS1___scale_space_sketch
+ into point structure amenable to subsequent processing, display, etc.
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS2____post_process.html" class="code" title="function [blob_feats,ridge_feats,edge_feats,contours,conn_components] = PS2___post_process(maxima_points,imsize,settings_tokens);">PS2____post_process</a>	[blob_feats,ridge_feats,edge_feats,contours,component_strings] = PS2___post_process(maxima_points,imsize,settings_tokens)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function  [points] =point_features(points_kept,imsize);</a>
+0002 <span class="comment">% [points] =point_features(points_kept,imsize)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Converts point structure returned by PS1___scale_space_sketch</span>
+0005 <span class="comment">% into point structure amenable to subsequent processing, display, etc.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0008 <span class="comment">% 10/10/2007</span>
+0009  
+0010 
+0011 [c_m,c_n]=  ind2sub(imsize,points_kept.indexes);
+0012 reject =find(points_kept.det_hess&lt;0);
+0013 curv = points_kept.tr_hess./max(points_kept.det_hess,.000000001);
+0014 
+0015 points.c_m = c_m';
+0016 points.c_n = c_n';
+0017 points.ratios = ones(size(points.c_m));
+0018 points.scales = points_kept.scl';
+0019 points.orientations = points_kept.theta';
+0020 points.ener = points_kept.ener';
+0021 points.curv = curv';
+0022 <span class="comment">%% will be used later to reject these points</span>
+0023 <span class="comment">%% (cuvr&gt;0 is an acceptance condition)</span>
+0024 points.curv(reject) = -1;</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

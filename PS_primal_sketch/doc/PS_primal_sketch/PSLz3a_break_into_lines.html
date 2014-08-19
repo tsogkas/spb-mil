@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PSLz3a_break_into_lines</title>
+  <meta name="keywords" content="PSLz3a_break_into_lines">
+  <meta name="description" content="res = PSLz3a_break_into_lines(components,size_m,size_n,ener)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PSLz3a_break_into_lines.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PSLz3a_break_into_lines
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>res = PSLz3a_break_into_lines(components,size_m,size_n,ener)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function res = PSLz3a_break_into_lines(components,size_m,ener); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> res = PSLz3a_break_into_lines(components,size_m,size_n,ener)
+ 
+ Takes continuous curves and breaks them into straight line segments.
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSLz3aI_recursive_break_tree.html" class="code" title="function bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)">PSLz3aI_recursive_break_tree</a>	bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)</li><li><a href="../PS_primal_sketch/misc/compress_structure.html" class="code" title="">compress_structure</a>	</li><li><a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PSL____line_tokens.html" class="code" title="function [line_features,contours,components] = PSL____line_tokens(points,imsize,thresh_line_ener);">PSL____line_tokens</a>	[line_features,contour,components] = PSL____line_tokens(edge_points,imsize,thresh_line_ener)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function res = PSLz3a_break_into_lines(components,size_m,ener);</a>
+0002 <span class="comment">% res = PSLz3a_break_into_lines(components,size_m,size_n,ener)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Takes continuous curves and breaks them into straight line segments.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0007 <span class="comment">% 10/10/2007</span>
+0008 
+0009 structure = components;
+0010 <a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>;
+0011 lines = []; merit_geom = [];
+0012 <span class="keyword">for</span> k=1:length(lstrings),
+0013     coords = lstrings{k};
+0014     <span class="keyword">if</span> length(coords)&gt;5
+0015 
+0016         <span class="comment">%% turn curve 1-d indexes into [c_m,c_n] coordinates</span>
+0017         coord_n = ceil(coords/size_m);
+0018         coord_m = coords - (coord_n - 1)*size_m;
+0019 
+0020         lines_comp    = {};
+0021         bin_tree = <a href="PSLz3aI_recursive_break_tree.html" class="code" title="function bin_tree =PSLz3aI_recursive_break_tree(c_x,c_y,index)">PSLz3aI_recursive_break_tree</a>(coord_m,coord_n,1:length(coord_n));
+0022 
+0023         <span class="comment">%% bin_tree struct</span>
+0024         <span class="comment">%% cost  -&gt; figure of merit at current tree</span>
+0025         <span class="comment">%% points: indexes of starting and ending points of leaves</span>
+0026 
+0027         returned = bin_tree.points;
+0028         <span class="keyword">for</span> ln=1:length(returned)-1,
+0029             wt = returned(ln):returned(ln+1);
+0030             lines_comp{ln} = [coord_m(wt);coord_n(wt);coords(wt);attribs{k}.ener(wt);attribs{k}.scl(wt)];
+0031         <span class="keyword">end</span>
+0032 
+0033         lines = [lines,lines_comp(:)'];
+0034         merit_geom = [merit_geom,bin_tree.merit];
+0035     <span class="keyword">end</span>
+0036 <span class="keyword">end</span>
+0037 
+0038 fields_wt = {<span class="string">'lines'</span>,<span class="string">'merit_geom'</span>};
+0039 <a href="../PS_primal_sketch/misc/compress_structure.html" class="code" title="">compress_structure</a>;
+0040 res = structure;</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

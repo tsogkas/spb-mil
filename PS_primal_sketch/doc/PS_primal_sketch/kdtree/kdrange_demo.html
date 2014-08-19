@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of kdrange_demo</title>
+  <meta name="keywords" content="kdrange_demo">
+  <meta name="description" content="% Demo of the KDRANGEQUERY function.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">kdtree</a> &gt; kdrange_demo.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\kdtree&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>kdrange_demo
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>% Demo of the KDRANGEQUERY function.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% Demo of the KDRANGEQUERY function.
+%
+%   Guy Shechter
+%   guy at jhu dot edu
+%   June 2004</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%% Demo of the KDRANGEQUERY function.</span>
+0002 <span class="comment">%%</span>
+0003 <span class="comment">%%   Guy Shechter</span>
+0004 <span class="comment">%%   guy at jhu dot edu</span>
+0005 <span class="comment">%%   June 2004</span>
+0006 
+0007 
+0008 
+0009 <span class="comment">%% Generate a set of 1000 reference datapoints in R^2</span>
+0010 ReferencePts = rand(1000,2); 
+0011 
+0012 <span class="comment">%%% Build the k-d Tree once from the reference datapoints.</span>
+0013 [tmp, tmp, TreeRoot] = kdtree( ReferencePts, []);
+0014 
+0015 <span class="comment">%%% and find all the points in the k-d tree that are within 0.4</span>
+0016 <span class="comment">%%% units (D-dimensional Euclidean, 2-norm, distance) from the origin</span>
+0017 [ PtsInNeighborhood, Dist ] = kdrangequery( TreeRoot, [.5 0], 0.4 );
+0018 <span class="keyword">if</span> 1==2,
+0019     <span class="comment">%%% Free the k-D Tree from memory.</span>
+0020     kdtree([],[],TreeRoot);
+0021 <span class="keyword">end</span>
+0022 
+0023 figure; clf; hold on; axis equal
+0024 
+0025 <span class="comment">%% Plot all the points in the k-D tree</span>
+0026 plot(ReferencePts(:,1), ReferencePts(:,2),<span class="string">'k.'</span>);
+0027 
+0028 <span class="comment">%% Draw a red circle around every point found in the neighborhood</span>
+0029 plot(PtsInNeighborhood(:,1), PtsInNeighborhood(:,2), <span class="string">'ro'</span>);
+0030 
+0031 <span class="comment">%% Show the arc with radius=0.4 centered at the origin.</span>
+0032 t=0:.01:pi/2;
+0033 plot(0.4*cos(t), 0.4*sin(t),<span class="string">'g-'</span>,<span class="string">'LineWidth'</span>,2);
+0034 
+0035</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

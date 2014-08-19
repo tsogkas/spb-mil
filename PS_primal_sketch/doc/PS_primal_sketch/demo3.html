@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of demo3</title>
+  <meta name="keywords" content="demo3">
+  <meta name="description" content="% A demonstration of the intermediate">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; demo3.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>demo3
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% A demonstration of the intermediate</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% A demonstration of the intermediate 
+% results used for primal sketch computation
+% Shows: scale space construction, maxima locations, curve segments,
+% marker image generation. 
+% 
+% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS00___primal_sketch.html" class="code" title="function [ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests);">PS00___primal_sketch</a>	[ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests)</li><li><a href="PSzz_components_to_markers.html" class="code" title="function [ridge_markers] = PSzz_components_to_markers(ridge_components,input_image);">PSzz_components_to_markers</a>	[ridge_markers] = PSzz_components_to_markers(ridge_components,input_image)</li><li><a href="PSzz_unzip_contour.html" class="code" title="function [res,orn] = PSzz_unzip_skeleton(skeleton);">PSzz_unzip_contour</a>	[res,orn] = PSzz_unzip_skeleton(skeleton)</li><li><a href="../PS_primal_sketch/viz/colored_contours.html" class="code" title="function colored_sketch  =  colored_contours(input_image,ridge_skel,edge_skel);">colored_contours</a>	</li><li><a href="../PS_primal_sketch/viz/show_3d_volume.html" class="code" title="function mov_volume =  show_3d_volume(val_3d_array,step);">show_3d_volume</a>	mov_volume =  show_3d_volume(val_3d_array,step);</li><li><a href="../PS_primal_sketch/viz/show_edges_on_image.html" class="code" title="function show_ridges_on_image(input_image,keyps,sc_k,selection,varargin)">show_edges_on_image</a>	</li><li><a href="../PS_primal_sketch/viz/show_intermediate_curves_on_image.html" class="code" title="function show_intermediate_curves_on_image(input_image,tokens,color)">show_intermediate_curves_on_image</a>	</li><li><a href="../PS_primal_sketch/viz/show_ridges_on_image.html" class="code" title="function show_ridges_on_image(input_image,keyps,sc_k,selection,varargin)">show_ridges_on_image</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%% A demonstration of the intermediate</span>
+0002 <span class="comment">%% results used for primal sketch computation</span>
+0003 <span class="comment">%% Shows: scale space construction, maxima locations, curve segments,</span>
+0004 <span class="comment">%% marker image generation.</span>
+0005 <span class="comment">%%</span>
+0006 <span class="comment">%% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0007 
+0008 input_image = double(imread(<span class="string">'horse010.jpg'</span>))/256;
+0009 
+0010 <span class="comment">%% Request the cubes formed by the intensity and feature-strength images</span>
+0011 <span class="comment">%% as the scale increases. Binary entries, corresponding to (ridge, edge, blob, intensity)</span>
+0012 override_sketch.keep_scale_space_im = [1,1,0,1];
+0013 override_tests  = [];
+0014 
+0015 [ridges,edges,blobs,contours,connected_components,scale_space_ims] =<span class="keyword">...</span>
+0016             <a href="PS00___primal_sketch.html" class="code" title="function [ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests);">PS00___primal_sketch</a>(input_image,override_sketch,override_tests);
+0017 
+0018 
+0019 <span class="keyword">for</span> it =[1,2],
+0020     <span class="keyword">if</span> it==1,
+0021         tokens = ridges; color = <span class="string">'b'</span>;
+0022         location_maxima       = <a href="PSzz_unzip_contour.html" class="code" title="function [res,orn] = PSzz_unzip_skeleton(skeleton);">PSzz_unzip_contour</a>(contours{1});
+0023         colored_sketch      =  <a href="../PS_primal_sketch/viz/colored_contours.html" class="code" title="function colored_sketch  =  colored_contours(input_image,ridge_skel,edge_skel);">colored_contours</a>(input_image,location_maxima,zeros(size(input_image)));
+0024     <span class="keyword">else</span>
+0025         tokens = edges; color = <span class="string">'g'</span>;
+0026         location_maxima       = <a href="PSzz_unzip_contour.html" class="code" title="function [res,orn] = PSzz_unzip_skeleton(skeleton);">PSzz_unzip_contour</a>(contours{2});
+0027         colored_sketch      =  <a href="../PS_primal_sketch/viz/colored_contours.html" class="code" title="function colored_sketch  =  colored_contours(input_image,ridge_skel,edge_skel);">colored_contours</a>(input_image,zeros(size(input_image)),location_maxima);
+0028     <span class="keyword">end</span>
+0029 
+0030     <span class="comment">%% Visualize feature strength-versus-scale as a cube.</span>
+0031     figure,<a href="../PS_primal_sketch/viz/show_3d_volume.html" class="code" title="function mov_volume =  show_3d_volume(val_3d_array,step);">show_3d_volume</a>(scale_space_ims{it});
+0032 
+0033     <span class="comment">%% Show the 3 processing stages involved in token computation</span>
+0034     figure,
+0035     subplot(1,3,1);
+0036     imshow(colored_sketch);
+0037     title(<span class="string">'Maxima Locations'</span>);
+0038 
+0039     subplot(1,3,2);
+0040     <a href="../PS_primal_sketch/viz/show_intermediate_curves_on_image.html" class="code" title="function show_intermediate_curves_on_image(input_image,tokens,color)">show_intermediate_curves_on_image</a>(input_image,tokens,color);
+0041     title(<span class="string">'Curve Segments'</span>);
+0042 
+0043     subplot(1,3,3);
+0044     <span class="keyword">if</span> it==1,
+0045         <a href="../PS_primal_sketch/viz/show_ridges_on_image.html" class="code" title="function show_ridges_on_image(input_image,keyps,sc_k,selection,varargin)">show_ridges_on_image</a>(input_image,tokens);
+0046     <span class="keyword">else</span>
+0047         <a href="../PS_primal_sketch/viz/show_edges_on_image.html" class="code" title="function show_ridges_on_image(input_image,keyps,sc_k,selection,varargin)">show_edges_on_image</a>(input_image,tokens);
+0048     <span class="keyword">end</span>
+0049     title(<span class="string">'Straight tokens'</span>);
+0050 <span class="keyword">end</span>
+0051 
+0052 [ridge_markers] = <a href="PSzz_components_to_markers.html" class="code" title="function [ridge_markers] = PSzz_components_to_markers(ridge_components,input_image);">PSzz_components_to_markers</a>(connected_components{1},input_image);
+0053 figure,imshow(min(input_image,1-ridge_markers)); title(<span class="string">'Ridge markers superimposed on image'</span>);</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

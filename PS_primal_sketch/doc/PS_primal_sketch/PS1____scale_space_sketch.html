@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PS1____scale_space_sketch</title>
+  <meta name="keywords" content="PS1____scale_space_sketch">
+  <meta name="description" content="[points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PS1____scale_space_sketch.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PS1____scale_space_sketch
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch)
+
+ Receives as input a gray scale image in [0,1] and the settings for primal
+ sketch extraction.
+ Returns a cell array with maxima points for ridge/edge/blob strengths
+ and, if requested, features from the image scale space.
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS1z1__initialize.html" class="code" title="function [D_xx,D_yy,D_xy,D_x,D_y,idxs,points,feat_strength_p] = PS1z1__initialize(input_image);">PS1z1__initialize</a>	[D_xx,D_yy,D_xy,D_x,D_y,idxs,points,feat_strength_p] =  PS1z1__initialize(input_image)</li><li><a href="PS1z2__get_gaussian_jet.html" class="code" title="function [gauss_jet] = PS1z2__get_gaussian_jet(input_image,scale_gauss,use_iir);">PS1z2__get_gaussian_jet</a>	[gauss_jet] = PS1z2__get_gaussian_jet(input_image,scale_gauss,use_iir)</li><li><a href="PS1z3__get_feature_strength.html" class="code" title="function [feat_strength_selection,feat_saliency,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch);">PS1z3__get_feature_strength</a>	[feat_strength_selection,feat_saliency,sc_min,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch)</li><li><a href="PS1z4__add_new_points.html" class="code" title="function  points = PS1z4__add_new_points(points,gauss_jet,indexes,feat_tp,scale_gauss,feat_strength_detection_p,sc_ind);">PS1z4__add_new_points</a>	points = PS1z4__add_new_points(points,gauss_jet,indexes,feat_tp,scale_gauss,feat_strength_detection_p,sc_ind)</li><li><a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS00___primal_sketch.html" class="code" title="function [ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests);">PS00___primal_sketch</a>	[ridge_feats,edge_feats,blob_feats,contours,conn_components,scale_space_ims] = PS00___primal_sketch(input_image,settings_sketch,settings_tests)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch);</a>
+0002 <span class="comment">% [points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Receives as input a gray scale image in [0,1] and the settings for primal</span>
+0005 <span class="comment">% sketch extraction.</span>
+0006 <span class="comment">% Returns a cell array with maxima points for ridge/edge/blob strengths</span>
+0007 <span class="comment">% and, if requested, features from the image scale space.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0010 <span class="comment">% 10/10/2007</span>
+0011 
+0012 extras_out_ss = [];
+0013 structure = settings_sketch; <a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>;
+0014 [D_xx,D_yy,D_xy,D_x,D_y,idxs,points,feat_strength_p] =  <a href="PS1z1__initialize.html" class="code" title="function [D_xx,D_yy,D_xy,D_x,D_y,idxs,points,feat_strength_p] = PS1z1__initialize(input_image);">PS1z1__initialize</a>(input_image);
+0015 
+0016 
+0017 <span class="comment">%% loop over scales</span>
+0018 <span class="keyword">for</span> sc_ind = 1:length(scales_wt),
+0019     scale_gauss = scales_wt(sc_ind);
+0020     [gauss_jet] = <a href="PS1z2__get_gaussian_jet.html" class="code" title="function [gauss_jet] = PS1z2__get_gaussian_jet(input_image,scale_gauss,use_iir);">PS1z2__get_gaussian_jet</a>(input_image,scale_gauss,use_iir);
+0021 
+0022     <span class="keyword">for</span> feat_tp = [1:3],                
+0023         [feat_strength_selection,feat_strength_detection,zero_crossing]  = <span class="keyword">...</span>
+0024             <a href="PS1z3__get_feature_strength.html" class="code" title="function [feat_strength_selection,feat_saliency,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch);">PS1z3__get_feature_strength</a>(gauss_jet,scale_gauss,feat_tp,settings_sketch);
+0025                            
+0026         <span class="comment">%%------------------------------------------------------------------------------</span>
+0027         <span class="comment">%% Find feature strength maxima in location and scale.</span>
+0028         <span class="comment">%% NOTE: For memory efficiency,</span>
+0029         <span class="comment">%% we only check whether the maxima at the previous iteration</span>
+0030         <span class="comment">%% (`_p' suffix)  are stronger than the current ones and the ones</span>
+0031         <span class="comment">%% before them ('_pp' suffix). That is, there is a 1-iteration delay</span>
+0032         <span class="comment">%% in detecting the maxima.</span>
+0033         <span class="comment">%%------------------------------------------------------------------------------</span>
+0034 
+0035         maxima_indexes =[];
+0036         <span class="keyword">if</span> feat_tp ==1, sc_min = 3; <span class="keyword">else</span> sc_min = 2; <span class="keyword">end</span>  <span class="comment">% for ridges it seems best to ignore the finest resolution</span>
+0037         <span class="keyword">if</span> sc_ind&gt;=sc_min,
+0038             max_str{feat_tp}  = min((feat_strength_p{feat_tp}&gt;feat_strength_selection),(feat_strength_p{feat_tp}&gt;feat_strength_pp{feat_tp}));
+0039             maxima_indexes = find(max_str{feat_tp}.*zc_p{feat_tp});
+0040         <span class="keyword">end</span>
+0041         <span class="keyword">if</span> ~isempty(maxima_indexes),
+0042             points{feat_tp} = <a href="PS1z4__add_new_points.html" class="code" title="function  points = PS1z4__add_new_points(points,gauss_jet,indexes,feat_tp,scale_gauss,feat_strength_detection_p,sc_ind);">PS1z4__add_new_points</a>(points{feat_tp},gauss_jet_prev,maxima_indexes,feat_tp,scale_gauss,feat_strength_detection_p,sc_ind);
+0043         <span class="keyword">end</span>
+0044         
+0045         feat_strength_pp{feat_tp}          = feat_strength_p{feat_tp}; 
+0046         feat_strength_p{feat_tp}           = feat_strength_selection;
+0047         feat_strength_detection_p{feat_tp} = feat_strength_detection;
+0048         zc_p{feat_tp} = zero_crossing;
+0049 
+0050         <span class="comment">%% if the user has asked for it, pack the feature images in a cube.</span>
+0051         <span class="keyword">if</span> keep_scale_space_im(feat_tp),
+0052             extras_out_ss{feat_tp}(:,:,sc_ind) =  feat_strength_detection;
+0053         <span class="keyword">end</span>            
+0054     <span class="keyword">end</span>
+0055     gauss_jet_prev = gauss_jet;    
+0056     <span class="keyword">if</span> keep_scale_space_im(4),
+0057         extras_out_ss{4}(:,:,sc_ind) =  gauss_jet.im_sc;
+0058     <span class="keyword">end</span>
+0059 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

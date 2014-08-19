@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of kdrangequery_txt</title>
+  <meta name="keywords" content="kdrangequery_txt">
+  <meta name="description" content="KDRANGEQUERY Find all points within a local neighborhood.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">kdtree</a> &gt; kdrangequery_txt.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\kdtree&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>kdrangequery_txt
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>KDRANGEQUERY Find all points within a local neighborhood.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment">
+ KDRANGEQUERY Find all points within a local neighborhood.
+ 
+  PTS = KDRANGEQUERY( ROOT, QUERYPT, DISTLIM ) finds all the
+  points stored in the k-D tree ROOT that are within DISTLIM units
+  from the QUERYPT. Proximity is quantified usng a D-dimensional
+  Euclidean (2-norm) distance.
+
+  Input :
+    ROOT is a pointer to a k-D tree which must be constructed with
+    the function KDTREE or KDTREEIDX. QUERYPT is a 1xD vector
+    representing a point in D-dimensional space. DISTLIM is a
+    scalar which specifies the radius of the neighborhood around
+    QUERYPT.
+
+  Output:
+    PTS is an NxD matrix, where each row is a datapoint from the
+    k-D tree ROOT. Each of these datapoints is found within a
+    distance DISTLIM from QUERYPT.
+
+  [PTS, DIST] = KDRANGEQUERY( ... ) returns the distances between
+  each row of PTS and QUERYPT in the Nx1 vector DIST.
+
+  [PTS, DIST, IDX ] = KDRANGEQUERY( ... ) returns the index value
+  for each row (point) of PTS. The index value maps back to a row
+  from the matrix REFERENCE used to build the k-D tree (see the 
+  KDTREE or KDTREEIDX functions).
+
+  Limitations: 
+    QUERYPT must be a 1xD dimensional array meaning that the range
+    query can be performed for one point at a time.
+
+  See also KDTREE and KDTREEIDX.
+
+  Written by / send comments or suggestions to :
+     Guy Shechter
+     guy at jhu dot edu
+     June 2004</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%</span>
+0002 <span class="comment">% KDRANGEQUERY Find all points within a local neighborhood.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%  PTS = KDRANGEQUERY( ROOT, QUERYPT, DISTLIM ) finds all the</span>
+0005 <span class="comment">%  points stored in the k-D tree ROOT that are within DISTLIM units</span>
+0006 <span class="comment">%  from the QUERYPT. Proximity is quantified usng a D-dimensional</span>
+0007 <span class="comment">%  Euclidean (2-norm) distance.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%  Input :</span>
+0010 <span class="comment">%    ROOT is a pointer to a k-D tree which must be constructed with</span>
+0011 <span class="comment">%    the function KDTREE or KDTREEIDX. QUERYPT is a 1xD vector</span>
+0012 <span class="comment">%    representing a point in D-dimensional space. DISTLIM is a</span>
+0013 <span class="comment">%    scalar which specifies the radius of the neighborhood around</span>
+0014 <span class="comment">%    QUERYPT.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%  Output:</span>
+0017 <span class="comment">%    PTS is an NxD matrix, where each row is a datapoint from the</span>
+0018 <span class="comment">%    k-D tree ROOT. Each of these datapoints is found within a</span>
+0019 <span class="comment">%    distance DISTLIM from QUERYPT.</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">%  [PTS, DIST] = KDRANGEQUERY( ... ) returns the distances between</span>
+0022 <span class="comment">%  each row of PTS and QUERYPT in the Nx1 vector DIST.</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">%  [PTS, DIST, IDX ] = KDRANGEQUERY( ... ) returns the index value</span>
+0025 <span class="comment">%  for each row (point) of PTS. The index value maps back to a row</span>
+0026 <span class="comment">%  from the matrix REFERENCE used to build the k-D tree (see the</span>
+0027 <span class="comment">%  KDTREE or KDTREEIDX functions).</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">%  Limitations:</span>
+0030 <span class="comment">%    QUERYPT must be a 1xD dimensional array meaning that the range</span>
+0031 <span class="comment">%    query can be performed for one point at a time.</span>
+0032 <span class="comment">%</span>
+0033 <span class="comment">%  See also KDTREE and KDTREEIDX.</span>
+0034 <span class="comment">%</span>
+0035 <span class="comment">%  Written by / send comments or suggestions to :</span>
+0036 <span class="comment">%     Guy Shechter</span>
+0037 <span class="comment">%     guy at jhu dot edu</span>
+0038 <span class="comment">%     June 2004</span>
+0039 <span class="comment">%</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

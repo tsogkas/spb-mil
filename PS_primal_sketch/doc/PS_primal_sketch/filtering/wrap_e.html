@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of wrap_e</title>
+  <meta name="keywords" content="wrap_e">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">filtering</a> &gt; wrap_e.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\filtering&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>wrap_e
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function  ewrap = wrap_e(e_mn,maxwrap); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="fir_gauss.html" class="code" title="function [im_sc,d_x,d_xx,d_y,d_yy,d_xy] = fir_gauss(L_in,scale);">fir_gauss</a>	% code for convolution with separable Gaussian and DoG filters.</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function  ewrap = wrap_e(e_mn,maxwrap);</a>
+0002 [N_m,N_n,nf] = size(e_mn);
+0003 <span class="comment">%ewrap = zeros(N_m+2*maxwrap,</span>
+0004 ewrap(maxwrap+(1:N_m),maxwrap+(1:N_n),:)=e_mn;
+0005 ewrap(1:maxwrap,:,:) = ewrap(maxwrap+N_m +[-maxwrap + 1:0],:,:);
+0006 ewrap(:,1:maxwrap,:) = ewrap(:,maxwrap+N_n +[-maxwrap + 1:0],:);
+0007 ewrap(maxwrap+N_m + (1:maxwrap),:,:)=ewrap(maxwrap + (1:maxwrap),:,:);
+0008 ewrap(:,maxwrap+N_n + (1:maxwrap),:)=ewrap(:,maxwrap + (1:maxwrap),:);</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

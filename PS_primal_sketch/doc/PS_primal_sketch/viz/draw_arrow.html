@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of draw_arrow</title>
+  <meta name="keywords" content="draw_arrow">
+  <meta name="description" content="draw filled circles at centers x with radii r.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">viz</a> &gt; draw_arrow.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\viz&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>draw_arrow
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>draw filled circles at centers x with radii r.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function h = draw_arrow(x, r, orientation,outline_color) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> draw filled circles at centers x with radii r.
+ x is a matrix of columns.  r is a row vector.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="show_ellipses_on_image.html" class="code" title="function show_ellipses_on_image(input_image,keyps,sc_k,selection,varargin)">show_ellipses_on_image</a>	</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function h = draw_arrow(x, r, orientation,outline_color)</a>
+0002 <span class="comment">% draw filled circles at centers x with radii r.</span>
+0003 <span class="comment">% x is a matrix of columns.  r is a row vector.</span>
+0004 
+0005 n = 3;                    <span class="comment">% resolution</span>
+0006 coords_x = [0:r/5:r];
+0007 coord_x = x(1) + cos(orientation)*(coords_x);
+0008 coord_y = x(2) + sin(orientation)*(coords_x);
+0009 
+0010 h = [];
+0011 <span class="comment">% hold is needed for fill()</span>
+0012 held = ishold;
+0013 hold on
+0014 
+0015 
+0016 h = [h line(coord_x,coord_y, <span class="string">'Color'</span>, outline_color)];</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

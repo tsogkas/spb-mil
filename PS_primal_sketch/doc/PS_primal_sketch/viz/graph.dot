@@ -1,0 +1,16 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  show_ellipses_on_image -> draw_arrow;
+  show_ellipses_on_image -> my_draw_ellipse;
+  show_ridges_on_image -> show_ellipses_on_image;
+
+  colored_contours [URL="colored_contours.html"];
+  draw_arrow [URL="draw_arrow.html"];
+  make_coords [URL="make_coords.html"];
+  my_draw_ellipse [URL="my_draw_ellipse.html"];
+  show_3d_volume [URL="show_3d_volume.html"];
+  show_edges_on_image [URL="show_edges_on_image.html"];
+  show_ellipses_on_image [URL="show_ellipses_on_image.html"];
+  show_intermediate_curves_on_image [URL="show_intermediate_curves_on_image.html"];
+  show_ridges_on_image [URL="show_ridges_on_image.html"];
+}

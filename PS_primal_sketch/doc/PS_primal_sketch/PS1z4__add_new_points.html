@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PS1z4__add_new_points</title>
+  <meta name="keywords" content="PS1z4__add_new_points">
+  <meta name="description" content="points = PS1z4__add_new_points(points,gauss_jet,indexes,feat_tp,scale_gauss,feat_strength_detection_p,sc_ind)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PS1z4__add_new_points.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PS1z4__add_new_points
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>points = PS1z4__add_new_points(points,gauss_jet,indexes,feat_tp,scale_gauss,feat_strength_detection_p,sc_ind)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function  points = PS1z4__add_new_points(points,gauss_jet,indexes,feat_tp,scale_gauss,feat_strength_detection_p,sc_ind); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> points = PS1z4__add_new_points(points,gauss_jet,indexes,feat_tp,scale_gauss,feat_strength_detection_p,sc_ind)
+
+ Utility function that concatenates previous set of maxima points with the
+ ones detected at the current scale.
+ 
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../PS_primal_sketch/misc/my_sign.html" class="code" title="function res = my_sign(input);">my_sign</a>	</li><li><a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS1____scale_space_sketch.html" class="code" title="function [points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch);">PS1____scale_space_sketch</a>	[points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch)</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function theta =  get_orientation_at_point(d_x_wt,d_y_wt,d_xx_wt,d_yy_wt,d_xy_wt,feat_tp);</a></li></ul>
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function  points = PS1z4__add_new_points(points,gauss_jet,indexes,feat_tp,scale_gauss,feat_strength_detection_p,sc_ind);</a>
+0002 <span class="comment">% points = PS1z4__add_new_points(points,gauss_jet,indexes,feat_tp,scale_gauss,feat_strength_detection_p,sc_ind)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Utility function that concatenates previous set of maxima points with the</span>
+0005 <span class="comment">% ones detected at the current scale.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0008 <span class="comment">% 10/10/2007</span>
+0009 
+0010 d_xx_wt = gauss_jet.d_xx(indexes);    
+0011 d_yy_wt = gauss_jet.d_yy(indexes);    
+0012 d_xy_wt = gauss_jet.d_xy(indexes);
+0013 d_x_wt =  gauss_jet.d_x(indexes);  
+0014 d_y_wt =  gauss_jet.d_y(indexes);
+0015 
+0016 theta =  <a href="#_sub1" class="code" title="subfunction theta =  get_orientation_at_point(d_x_wt,d_y_wt,d_xx_wt,d_yy_wt,d_xy_wt,feat_tp);">get_orientation_at_point</a>(d_x_wt,d_y_wt,d_xx_wt,d_yy_wt,d_xy_wt,feat_tp);
+0017 trace_hessian_sq     =  <a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(d_xx_wt + d_yy_wt);
+0018 determinant_hessian  = d_xx_wt.*d_yy_wt - <a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(d_xy_wt);
+0019 ener  =  feat_strength_detection_p{feat_tp}(indexes);
+0020 scl   =  scale_gauss*ones(length(indexes),1);
+0021 scind =  sc_ind*ones(length(indexes),1);
+0022 
+0023 
+0024 points.theta     = [points.theta;theta];
+0025 points.indexes   = [points.indexes;indexes];
+0026 points.ener      = [points.ener;ener];
+0027 points.scl       = [points.scl;scl];
+0028 points.tr_hess   = [points.tr_hess;trace_hessian_sq];
+0029 points.det_hess  = [points.det_hess;determinant_hessian];
+0030 points.scind     = [points.scind;scind];
+0031 
+0032 <span class="comment">%%--------------------------------------------------------------------------------------------</span>
+0033 <span class="comment">%% Internal functions</span>
+0034 <span class="comment">%%--------------------------------------------------------------------------------------------</span>
+0035 <a name="_sub1" href="#_subfunctions" class="code">function theta =  get_orientation_at_point(d_x_wt,d_y_wt,d_xx_wt,d_yy_wt,d_xy_wt,feat_tp);</a>
+0036 <span class="keyword">if</span>  feat_tp==1,
+0037     <span class="comment">%% for ridges the orientation is determined by the eigenvectors of the</span>
+0038     <span class="comment">%% Hessian matrix (local structure is valey/peak)</span>
+0039     common_term = ((d_xx_wt-d_yy_wt).^2 + 4*(d_xy_wt).^2);
+0040     sq_com_term = sqrt(common_term);
+0041     cos_b = sqrt(1/2*( 1 + (d_xx_wt - d_yy_wt)./max(sq_com_term,eps)));
+0042     sin_b = <a href="../PS_primal_sketch/misc/my_sign.html" class="code" title="function res = my_sign(input);">my_sign</a>(d_xy_wt).*sqrt(1/2*( 1 - (d_xx_wt - d_yy_wt)./max(sq_com_term,eps)));
+0043     L_pp_nn = 1/2*(d_xx_wt + d_yy_wt - sq_com_term);
+0044     L_qq_nn = 1/2*(d_xx_wt + d_yy_wt + sq_com_term);
+0045     choose = abs(L_pp_nn)&gt;abs(L_qq_nn);
+0046     theta  = atan2(sin_b,cos_b) + pi/2.*choose;
+0047 <span class="keyword">else</span>
+0048     <span class="comment">%% otherwise orientation is determined by the x/y derivatives</span>
+0049     sqren = sqrt(max(<a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(d_x_wt) + <a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(d_y_wt),eps));
+0050     cos_b = d_x_wt./sqren;   sin_b = d_y_wt./sqren;
+0051     theta =  atan2(sin_b,cos_b);
+0052 <span class="keyword">end</span>
+0053 
+0054 
+0055 
+0056 
+0057</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

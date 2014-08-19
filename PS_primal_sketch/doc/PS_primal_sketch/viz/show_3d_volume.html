@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of show_3d_volume</title>
+  <meta name="keywords" content="show_3d_volume">
+  <meta name="description" content="mov_volume =  show_3d_volume(val_3d_array,step);">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">viz</a> &gt; show_3d_volume.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\viz&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>show_3d_volume
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>mov_volume =  show_3d_volume(val_3d_array,step);</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function mov_volume =  show_3d_volume(val_3d_array,step); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> mov_volume =  show_3d_volume(val_3d_array,step);
+ 
+ Receives as input a 3d image  (3rd dimension is time/scale % etc.)
+ and visualizes this as a 3d cube.
+ `step' is for subsampling the x/y dims (default is 2);
+ 
+ If mov_volume is requested, it makes a movie of this evolution.
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../PS_primal_sketch/demo3.html" class="code" title="">demo3</a>	% A demonstration of the intermediate</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function mov_volume =  show_3d_volume(val_3d_array,step);</a>
+0002 <span class="comment">% mov_volume =  show_3d_volume(val_3d_array,step);</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Receives as input a 3d image  (3rd dimension is time/scale % etc.)</span>
+0005 <span class="comment">% and visualizes this as a 3d cube.</span>
+0006 <span class="comment">% `step' is for subsampling the x/y dims (default is 2);</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% If mov_volume is requested, it makes a movie of this evolution.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0011 <span class="comment">% 10/10/2007</span>
+0012 
+0013 <span class="keyword">if</span> nargin ==1, step =2; <span class="keyword">end</span>
+0014 load mri;
+0015 <span class="comment">%isocaps(flipdim(1-val_3d_array(1:step:end,1:step:end,:),1),-.1);</span>
+0016 
+0017 views = [   0.9063    0.4226         0   -0.6645;<span class="keyword">...</span>
+0018     -0.3696    0.7927    0.4848   -0.4539;<span class="keyword">...</span>
+0019     -0.2049    0.4394   -0.8746    8.9803;<span class="keyword">...</span>
+0020     0         0         0    1.0000];
+0021 
+0022 ha = axes;
+0023 nvol = size(val_3d_array,3);
+0024 <span class="keyword">for</span> k=2:nvol,
+0025     isocaps(flipdim(1-val_3d_array(1:step:<span class="keyword">end</span>,1:step:<span class="keyword">end</span>,1:k),1),-.1);
+0026     axis(<span class="string">'tight'</span>); <span class="comment">%axis(h0);</span>
+0027     colormap(map)
+0028     view(views);
+0029     h0 = axis; axis([h0(1:5),nvol]);
+0030     set(ha,<span class="string">'xtick'</span>,[],<span class="string">'ytick'</span>,[],<span class="string">'ztick'</span>,[]);
+0031     <span class="keyword">if</span> nargout~=0,
+0032         mov_edge(k-1) = getframe;
+0033     <span class="keyword">end</span>
+0034     pause(.01);
+0035 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

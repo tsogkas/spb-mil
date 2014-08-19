@@ -1,0 +1,13 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  fir_gauss -> filter1;
+  fir_gauss -> peel;
+  fir_gauss -> wrap_e;
+
+  filter1 [URL="filter1.html"];
+  fir_gauss [URL="fir_gauss.html"];
+  my_patch [URL="my_patch.html"];
+  nonmax [URL="nonmax.html"];
+  peel [URL="peel.html"];
+  wrap_e [URL="wrap_e.html"];
+}

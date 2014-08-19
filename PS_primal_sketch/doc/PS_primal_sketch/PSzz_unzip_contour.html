@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PSzz_unzip_contour</title>
+  <meta name="keywords" content="PSzz_unzip_contour">
+  <meta name="description" content="[res,orn] = PSzz_unzip_skeleton(skeleton)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PSzz_unzip_contour.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PSzz_unzip_contour
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[res,orn] = PSzz_unzip_skeleton(skeleton)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [res,orn] = PSzz_unzip_skeleton(skeleton); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [res,orn] = PSzz_unzip_skeleton(skeleton)
+
+ Turn zipped skeleton into image.
+ 
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="demo1.html" class="code" title="">demo1</a>	% Basic primal sketch demo:</li><li><a href="demo3.html" class="code" title="">demo3</a>	% A demonstration of the intermediate</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [res,orn] = PSzz_unzip_skeleton(skeleton);</a>
+0002 <span class="comment">% [res,orn] = PSzz_unzip_skeleton(skeleton)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Turn zipped skeleton into image.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0007 <span class="comment">% 10/10/2007</span>
+0008 
+0009 res= zeros(skeleton.sz);
+0010 res(skeleton.idx) = skeleton.ener;
+0011 <span class="keyword">if</span> nargout==2,
+0012     orn = zeros(skeleton.sz);
+0013     orn(skeleton.idx) = skeleton.orn;
+0014 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PS1z3__get_feature_strength</title>
+  <meta name="keywords" content="PS1z3__get_feature_strength">
+  <meta name="description" content="[feat_strength_selection,feat_saliency,sc_min,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../menu.html">Home</a> &gt;  <a href="menu.html">PS_primal_sketch</a> &gt; PS1z3__get_feature_strength.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../menu.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>PS1z3__get_feature_strength
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[feat_strength_selection,feat_saliency,sc_min,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [feat_strength_selection,feat_saliency,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [feat_strength_selection,feat_saliency,sc_min,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch)
+
+ Given the gaussian jet of an image calculates the strength of different
+ features. 
+ 
+ INPUT:
+   gauss_jet: gaussian jet of the image at scale_gauss
+   feat_tp: feature_type   (1=ridge/2=edge/3=blob) 
+   settings_sketch: settings for sketch (Lindeberg's gamma values etc.)
+ OUTPUT:
+   feat_strength_selection:  strength  for scale selection 
+   feat_saliency:            strength  for saliency estimation 
+   zc: zero-crossing / maxima-in-space locations (zc)
+
+ Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;
+ 10/10/2007</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS1z3a_get_hessian_orientation.html" class="code" title="function [cos_hessian,sin_hessian,L_pp,L_qq]   = PS1z3a_get_hessian_orientation(d_xx,d_yy,d_xy);">PS1z3a_get_hessian_orientation</a>	[cos_hessian,sin_hessian,L_pp,L_qq]   = PS1z3a_get_hessian_orientation(d_xx,d_yy,d_xy)</li><li><a href="PS1z3b_maxalong_orientation.html" class="code" title="function   [ismax,ismin] = PS1z3b_maxalong_orientation(derivstr,cos_eig,sin_eig,L_1,L_2);">PS1z3b_maxalong_orientation</a>	[ismax,ismin] = PS1z3b_maxalong_orientation(derivstr,cos_eig,sin_eig,L_1,L_2)</li><li><a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>	</li><li><a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PS1____scale_space_sketch.html" class="code" title="function [points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch);">PS1____scale_space_sketch</a>	[points,extras_out_ss] = PS1____scale_space_sketch(input_image,settings_sketch)</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [feat_strength_selection,feat_saliency,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch);</a>
+0002 <span class="comment">% [feat_strength_selection,feat_saliency,sc_min,zc]  = PS1z3__get_feature_strength(gauss_jet,scale_gauss,feat_tp,settings_sketch)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Given the gaussian jet of an image calculates the strength of different</span>
+0005 <span class="comment">% features.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% INPUT:</span>
+0008 <span class="comment">%   gauss_jet: gaussian jet of the image at scale_gauss</span>
+0009 <span class="comment">%   feat_tp: feature_type   (1=ridge/2=edge/3=blob)</span>
+0010 <span class="comment">%   settings_sketch: settings for sketch (Lindeberg's gamma values etc.)</span>
+0011 <span class="comment">% OUTPUT:</span>
+0012 <span class="comment">%   feat_strength_selection:  strength  for scale selection</span>
+0013 <span class="comment">%   feat_saliency:            strength  for saliency estimation</span>
+0014 <span class="comment">%   zc: zero-crossing / maxima-in-space locations (zc)</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% Iasonas Kokkinos &lt;jkokkin@stat.ucla.edu&gt;</span>
+0017 <span class="comment">% 10/10/2007</span>
+0018 
+0019 structure =gauss_jet; <a href="../PS_primal_sketch/misc/expand_structure.html" class="code" title="">expand_structure</a>;
+0020 t = scale_gauss.^2;
+0021 <span class="keyword">switch</span> feat_tp,
+0022     <span class="keyword">case</span> 1,
+0023         <span class="comment">%% ridges</span>
+0024         gamma_n_ridge = settings_sketch.gamma_n_ridge;
+0025         <span class="comment">%% ridge strength measure used: A (Eq. 51 in Lindeberg)</span>
+0026 
+0027         differential_operator    =  (<a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(d_xx - d_yy) + 4*<a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(d_xy));
+0028         feat_strength_selection  =  t^(2*gamma_n_ridge)*differential_operator;
+0029         feat_saliency            =  2*sqrt(t^2*differential_operator);
+0030     <span class="keyword">case</span> 2,
+0031         <span class="comment">%% edges</span>
+0032         differential_operator = (<a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(d_x) + <a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(d_y));
+0033         feat_strength_selection = t^(settings_sketch.gamma_n_edge).*differential_operator;
+0034         <span class="comment">%% as in lindeberg's paper, the saliency measure is obtained at</span>
+0035         <span class="comment">%% gamma_n_edge =1</span>
+0036         feat_saliency = sqrt(t*(2*pi)*differential_operator);        
+0037     <span class="keyword">case</span> 3,
+0038         <span class="comment">%% blob</span>
+0039         gamma_blob  = 1;
+0040         differential_operator = abs(d_xx + d_yy);
+0041         feat_strength_selection = t^(gamma_blob).*differential_operator;
+0042         feat_saliency = feat_strength_selection*3/2;
+0043 <span class="keyword">end</span>
+0044 
+0045 <span class="comment">%% get condition for a zero crossing</span>
+0046 <span class="keyword">switch</span> feat_tp,
+0047     <span class="keyword">case</span> 1, 
+0048         <span class="comment">%% ridges</span>
+0049         <span class="comment">%% check if image reaches maximum along the ridge's orientation</span>
+0050         [cos_eig,sin_eig,L_1,L_2] =  <a href="PS1z3a_get_hessian_orientation.html" class="code" title="function [cos_hessian,sin_hessian,L_pp,L_qq]   = PS1z3a_get_hessian_orientation(d_xx,d_yy,d_xy);">PS1z3a_get_hessian_orientation</a>(d_xx,d_yy,d_xy);    
+0051         [ismax,ismin]             =  <a href="PS1z3b_maxalong_orientation.html" class="code" title="function   [ismax,ismin] = PS1z3b_maxalong_orientation(derivstr,cos_eig,sin_eig,L_1,L_2);">PS1z3b_maxalong_orientation</a>(gauss_jet,cos_eig,sin_eig,L_1,L_2);
+0052         zc                        =  max(ismax,ismin);   
+0053         zc([end-1,end],:) = 0;
+0054     <span class="keyword">case</span> 2,   
+0055         <span class="comment">%% edges</span>
+0056         <span class="comment">%% zero crossing of D_vv (Eq. 9 in Lindeberg's paper)</span>
+0057         D_vv  =  <a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(d_x).*d_xx + 2.*d_x.*d_y.*d_xy + <a href="../PS_primal_sketch/misc/pow_2.html" class="code" title="function res = pow_2(input);">pow_2</a>(d_y).*d_yy;;
+0058         value_right  =  D_vv(:,[2:<span class="keyword">end</span>,end]);
+0059         value_up     =  D_vv([2:<span class="keyword">end</span>,2],:);
+0060         zc    = max(((D_vv.*value_right)&lt;0),((D_vv.*value_up)&lt;0));
+0061         zc([end-1,end],:) = 0;
+0062     <span class="keyword">case</span> {3}   
+0063         <span class="comment">%% blobs</span>
+0064         <span class="comment">%% estimate the maximum of the (8+1)-pt neighborhood around each</span>
+0065         <span class="comment">%% pixel and check whether it is attained at that pixel</span>
+0066         val_max = max(feat_strength_selection,feat_strength_selection(:,[2:<span class="keyword">end</span>,end]));
+0067         val_max = max(val_max,feat_strength_selection(:,[1,1:end-1]));
+0068         val_max = max(val_max,feat_strength_selection([1,1:end-1],:));
+0069         val_max = max(val_max,feat_strength_selection([1,1:end-1],[1,1:end-1]));
+0070         val_max = max(val_max,feat_strength_selection([1,1:end-1],[2:<span class="keyword">end</span>,end]));
+0071         val_max = max(val_max,feat_strength_selection([2:<span class="keyword">end</span>,end],:));
+0072         val_max = max(val_max,feat_strength_selection([2:<span class="keyword">end</span>,end],[1,1:end-1]));
+0073         val_max = max(val_max,feat_strength_selection([2:<span class="keyword">end</span>,end],[2:<span class="keyword">end</span>,end]));
+0074         zc = (val_max ==feat_strength_selection);
+0075 <span class="keyword">end</span>
+0076</pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

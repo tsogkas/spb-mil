@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of filter1</title>
+  <meta name="keywords" content="filter1">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../menu.html">Home</a> &gt;  <a href="../menu.html">PS_primal_sketch</a> &gt; <a href="menu.html">filtering</a> &gt; filter1.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../menu.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="menu.html">Index for PS_primal_sketch\filtering&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>filter1
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function res= filter1(filt,input,dim,patch_size); </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="fir_gauss.html" class="code" title="function [im_sc,d_x,d_xx,d_y,d_yy,d_xy] = fir_gauss(L_in,scale);">fir_gauss</a>	% code for convolution with separable Gaussian and DoG filters.</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function res= filter1(filt,input,dim,patch_size);</a>
+0002 
+0003 <span class="keyword">if</span> nargin&lt;4,
+0004     patch_size = 0;
+0005 <span class="keyword">else</span>
+0006     [size_m,size_n]  =size(input);
+0007     patch_size_m = patch_size*(dim==1);
+0008     patch_size_n = patch_size*(dim==2);
+0009 
+0010     dim_wt_m = [(patch_size_m + 1):(patch_size_m+size_m)];
+0011     dim_wt_n = [(patch_size_n + 1):(patch_size_n+size_n)];
+0012     
+0013     input = [zeros(patch_size_m,size_n);input;zeros(patch_size_m,size_n)];
+0014     input = [zeros(size_m+2*patch_size_m,patch_size_n),input,<span class="keyword">...</span>
+0015              zeros(size_m+2*patch_size_m,patch_size_n)];
+0016 <span class="keyword">end</span>
+0017 
+0018 [size_m,size_n] = size(input);
+0019 filt = reshape(filt,[1, length(filt)]);
+0020 l_f = ceil((length(filt)+1)/2);
+0021 
+0022 input = [[input;zeros(l_f*(dim==1),size_n)],zeros(size_m + l_f*(dim==1),l_f*(dim==2))];
+0023 res = filter(fliplr(filt),1,input,[],dim);
+0024 res = res((1:size_m)+(dim==1)*(l_f-1),(1:size_n)  + (dim==2)*(l_f-1));
+0025 <span class="keyword">if</span> nargin==4,
+0026     res = res(dim_wt_m,dim_wt_n);
+0027 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sun 30-Sep-2007 20:39:09 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>
