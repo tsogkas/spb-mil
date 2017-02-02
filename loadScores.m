@@ -1,0 +1,33 @@
+function scores = loadScores()
+
+paths                     = setPaths;
+rpbModelSpectral          = load(fullfile(paths.models,'rpbModelSpectral'),'rpbModel');
+rpbModelSpectral          = rpbModelSpectral.rpbModel;
+rpbModelColor             = load(fullfile(paths.models,'rpbModelColor'),'rpbModel');
+rpbModelColor             = rpbModelColor.rpbModel;
+rpbModelGray              = load(fullfile(paths.models,'rpbModelGray'),'rpbModel');
+rpbModelGray              = rpbModelGray.rpbModel;
+rpbModelNoTexture         = load(fullfile(paths.models,'rpbModelNoTexture'),'rpbModel');
+rpbModelNoTexture         = rpbModelNoTexture.rpbModel;
+
+scores.color.final        = fullfile(paths.scores,[rpbModelColor.name '_final.txt']);
+scores.color.pr           = fullfile(paths.scores,[rpbModelColor.name '_pr.txt']);
+scores.gray.final         = fullfile(paths.scores,[rpbModelGray.name '_final.txt']);
+scores.gray.pr            = fullfile(paths.scores,[rpbModelGray.name '_pr.txt']);
+scores.noTexture.final    = fullfile(paths.scores,[rpbModelNoTexture.name '_final.txt']);
+scores.noTexture.pr       = fullfile(paths.scores,[rpbModelNoTexture.name '_pr.txt']);
+scores.spectral.final     = fullfile(paths.scores,[rpbModelSpectral.name '_final.txt']);
+scores.spectral.pr        = fullfile(paths.scores,[rpbModelSpectral.name '_pr.txt']);
+scores.sgrouped50.final   = fullfile(paths.scores,[rpbModelSpectral.name '_grouped50_final.txt']);
+scores.sgrouped50.pr      = fullfile(paths.scores,[rpbModelSpectral.name '_grouped50_pr.txt']);
+scores.sgrouped100.final  = fullfile(paths.scores,[rpbModelSpectral.name '_grouped100_final.txt']);
+scores.sgrouped100.pr     = fullfile(paths.scores,[rpbModelSpectral.name '_grouped100_pr.txt']);
+scores.cgrouped50.final   = fullfile(paths.scores,[rpbModelColor.name '_grouped50_final.txt']);
+scores.cgrouped50.pr      = fullfile(paths.scores,[rpbModelColor.name '_grouped50_pr.txt']);
+scores.cgrouped100.final  = fullfile(paths.scores,[rpbModelColor.name '_grouped100_final.txt']);
+scores.cgrouped100.pr     = fullfile(paths.scores,[rpbModelColor.name '_grouped100_pr.txt']);
+scores.lind.final         = fullfile(paths.scores,'lind_final.txt');
+scores.lind.pr            = fullfile(paths.scores,'lind_pr.txt');
+scores.levin.final        = fullfile(paths.scores,'levin_final.txt');
+scores.levin.pr           = fullfile(paths.scores,'levin_pr.txt');
+scores.self               = paths.scores;
