@@ -37,24 +37,24 @@ csim = [];
 dlc = zeros(h, w, nOrient, nScales, nChannels, 'single');
 drc = zeros(h, w, nOrient, nScales, nChannels, 'single');
 dlr = zeros(h, w, nOrient, nScales, nChannels, 'single');
-for isc=1:nScales
-    scale   = floor(scales(isc)/step(isc)); % adjust scale to subsampled size
+for s=1:nScales
+    scale   = floor(scales(s)/step(s)); % adjust scale to subsampled size
     hMargin = 3*scale+2;
     wMargin = 3*scale+1;             % adjust image size to speed up convolution
-    h0      = floor(h/step(isc));    % dimensions for original subsampled image
-    w0      = floor(w/step(isc));
-    for ior=1:nOrient
-        imrot   = imrotate(lmap{pyramidLevel(isc)},rad2deg(thetas(ior)));
+    h0      = floor(h/step(s));    % dimensions for original subsampled image
+    w0      = floor(w/step(s));
+    for o=1:nOrient
+        imrot   = imrotate(lmap{pyramidLevel(s)},rad2deg(thetas(o)));
         imrot   = imrot(pad+1-hMargin:end-pad+hMargin,pad+1-wMargin:end-pad+wMargin,:);
-        for ich=1:nChannels
-            hgrad = computeHistogramGradient(imrot(:,:,ich),nBins(ich),...
-                scale,thetas(ior),[h0,w0],usechi2(ich),smooth,csim,ratio);            
+        for c=1:nChannels
+            hgrad = computeHistogramGradient(imrot(:,:,c),nBins(c),...
+                scale,thetas(o),[h0,w0],usechi2(c),smooth,csim,ratio);            
             if size(hgrad,1)~=h || size(hgrad,2)~=w
                 hgrad = imresize(hgrad, [h,w],'bilinear');
             end
-            dlc(:,:,ior,isc,ich) = hgrad(:,:,1);
-            drc(:,:,ior,isc,ich) = hgrad(:,:,2);
-            dlr(:,:,ior,isc,ich) = hgrad(:,:,3);
+            dlc(:,:,o,s,c) = hgrad(:,:,1);
+            drc(:,:,o,s,c) = hgrad(:,:,2);
+            dlr(:,:,o,s,c) = hgrad(:,:,3);
         end
     end
 end

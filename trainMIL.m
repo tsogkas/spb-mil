@@ -32,7 +32,7 @@ function spbModel = trainMIL(trainOpts)
 % Last upadate: August 2013
 
 opts.tag        = [];           % results description
-opts.trainSet    = 'trainval';
+opts.trainSet   = 'trainval';
 opts.featureSet = 'color';
 opts.nSamples   = 3e5;          % total number of samples
 opts.cost       = 'nor';        % cost function to optimize
