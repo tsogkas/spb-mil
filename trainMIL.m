@@ -94,7 +94,7 @@ disp('Fitting model...')
 nIterDone = 0;  % sometimes minimize stops prematurely
 while nIterDone<20
     w_0 = rand(nDim,1);
-    [w,lliVec,nIterDone] = minimize(w_0,'likelihood',nOptIter,cost,y,x,xReshaped,true); % weights and log-likelihood vector
+    [w,lliVec,nIterDone] = minimize(w_0,'loglikelihood',nOptIter,cost,y,x,xReshaped,true); % weights and log-likelihood vector
 end
 
 %     % --- Calculate probabilites for bag instances and bags (Noisy-OR)
@@ -132,8 +132,8 @@ assert(nSamplesPerImage>0,'number of samples per image must be positive!');
 ticStart = tic;
 for i = 1:numel(trainImages)
     [~,imageName,ext] = fileparts(trainImages(i).name);
-    im                = im2double(imread(trainImages(i).name));
-    if strcmp(featureSet,'gray'), im = rgb2gray(im); end
+    img               = im2double(imread(trainImages(i).name));
+    if strcmp(featureSet,'gray'), img = rgb2gray(img); end
     fprintf('Sampling image %d/%d (iid = %s)...', i, length(trainImages), imageName);
     sgt = load(['gt_' imageName '.mat']); sgt = sgt.gt; 
     bgt = load([imageName '.mat']); bgt = bgt.groundTruth;
@@ -141,7 +141,7 @@ for i = 1:numel(trainImages)
     sgt             = bwmorph(sgt,'thin','inf');
 %     sgt(boundaries) = 0; % make sure that medial axes and boundaries do not overlap 
     distanceMap     = bwdist(sgt);
-    histf           = computeHistogramFeatures(im,true);
+    histf           = computeHistogramFeatures(img,true);
     [height,width,nOrient,nScales,~] = size(histf.dlc);
     if strcmp(featureSet,'spectral')
         spectralFeat = load(['spectral_' imageName '.mat']);
@@ -355,7 +355,7 @@ end
 fprintf('\r');
 
 % -------------------------------------------------------------------------
-function [lli, lliDeriv] = loglikelihood(mode,w,y,x,xReshaped,deriv)
+function [L, dL] = loglikelihood(mode,w,y,x,xReshaped,deriv)
 % -------------------------------------------------------------------------
 % [lli, lliDeriv] = loglikeNOR(mode,w,y,x,xReshaped,deriv)
 %
@@ -393,10 +393,10 @@ switch mode
         p_inst      = 1./(1 + exp(-in_prd)); % bag and bag-instances probabilities (Noisy-OR)
         logp_bags   = sum(log(1-p_inst+eps),2);
         p_bags      = exp(logp_bags); % p_bags = Prod(1-p_inst) so that we can use log1p later
-        lli         = -y' * log1p(-p_bags) - (1-y)' * logp_bags; % minus log-likelihood
+        L           = -y' * log1p(-p_bags) - (1-y)' * logp_bags; % minus log-likelihood
         if deriv
             tc       = (y-(1-p_bags))./(1-p_bags);
-            lliDeriv = -(tc' * squeeze(sum(bsxfun(@times,x,p_inst), 2)))'; % log-likelihood derivative with respect to w
+            dL = -(tc' * squeeze(sum(bsxfun(@times,x,p_inst), 2)))'; % log-likelihood derivative with respect to w
         end
     case 'max'
         %   Log-likelihood and its gradient for the Multiple Instance Learning
@@ -412,10 +412,10 @@ switch mode
         for iDim=1:nDims % get linear indices for instances of strongest instances
             linIdx = [linIdx sub2ind(size(x),1:nSamples,indInst',iDim*ones(1,nSamples))];
         end
-        lli        = -y' * log(p_bags) - (1-y)' * log(1-p_bags);   % minus log-likelihood
+        L        = -y' * log(p_bags) - (1-y)' * log(1-p_bags);   % minus log-likelihood
         if deriv
             x       = reshape(x(linIdx'),nSamples,nDims);
-            lligrad = -(x' * (y-p_bags)); % log-likelihood derivative with respect to vector of b coefficients
+            dL = -(x' * (y-p_bags)); % log-likelihood derivative with respect to vector of b coefficients
         end
     case 'log'
         %   Log-likelihood and its gradient for the Multiple Instance Learning
@@ -427,9 +427,9 @@ switch mode
         hardness    = 10;                    % the higher, the more precise the softmax approximation
         expsum      = sum(exp(hardness * p_inst), 2);
         p_bags      = log(expsum) ./ hardness;
-        lli         = -y' * log(p_bags) - (1-y)' * log(1-p_bags); % minus log-likelihood
+        L           = -y' * log(p_bags) - (1-y)' * log(1-p_bags); % minus log-likelihood
         tc          = (y-p_bags) ./ (p_bags .* (1-p_bags) .* expsum);
-        lligrad     = -(tc' * squeeze(sum(bsxfun(@times, x, ...
+        dL          = -(tc' * squeeze(sum(bsxfun(@times, x, ...
             exp(hardness*p_inst) .* p_inst .* (1-p_inst)), 2)))'; % log-likelihood derivative with respect w
     otherwise
         error('Mode should be one of ''nor'', ''max'' or ''log''')
