@@ -1,18 +1,20 @@
-function [features] = computeHistogramFeatures(im,fine,usechi2,smooth,ratio)
+function features = computeHistogramFeatures(im)
 % Extracts color,brighteness and texture features based on chi-square
 % histogram differences.
 % 
 %   [features] = computeHistogramFeatures(im,fine,b,usechi2,smooth,ratio)
 % 
-% Stavros Tsogkas <stavros.tsogkas@ecp.fr>
-% Last update: August 2015
+% Stavros Tsogkas <tsogkas@cs.toronto.edu>
+% Last update: February 2017
 
-if nargin<2, fine    = true;      end;  % compute features at finer scale
-if nargin<3, usechi2 = [1 1 1 1]; end;  % use chi-square distance or other
-if nargin<4, smooth  = 'savgol';  end;  % use savgol filtering 
-if nargin<5, ratio   = 2;         end;  % ratio between rectangle filter sides
 
-scales  = [6:2:14, 16:4:28, 32:8:48]; if fine, scales = [4, scales]; end
+opts.fine    = true;       % compute features at finer scale
+opts.usechi2 = [1 1 1 1];  % use chi-square distance or other
+opts.smooth  = 'savgol';   % use savgol filtering 
+opts.ratio   = 2;          % ratio between rectangle filter sides
+opts         = parseVarargin(opts, varargin);
+
+scales  = [6:2:14, 16:4:28, 32:8:48]; if opts.fine, scales = [4, scales]; end
 thetas  = (0:7)*pi/8;
 nScales = length(scales);
 nOrient = length(thetas);
@@ -48,7 +50,7 @@ for s=1:nScales
         imrot   = imrot(pad+1-hMargin:end-pad+hMargin,pad+1-wMargin:end-pad+wMargin,:);
         for c=1:nChannels
             hgrad = computeHistogramGradient(imrot(:,:,c),nBins(c),...
-                scale,thetas(o),[h0,w0],usechi2(c),smooth,csim,ratio);            
+                scale,thetas(o),[h0,w0],opts.usechi2(c),opts.smooth,csim,ratio);            
             if size(hgrad,1)~=h || size(hgrad,2)~=w
                 hgrad = imresize(hgrad, [h,w],'bilinear');
             end
@@ -118,7 +120,6 @@ else % RGB image
     % used to scale values into the unit interval
     abmin = -73;
     abmax = 95;
-%   gamma = 2.5; lab = RGB2Lab(im.^gamma);
     lab = applycform(im, makecform('srgb2lab'));
     lab(:,:,1) = lab(:,:,1) ./ 100;
     lab(:,:,2) = (lab(:,:,2) - abmin) ./ (abmax-abmin);
@@ -147,7 +148,6 @@ tmap = assignTextons(fbRun(textonData.fb,tmapim),textonData.tex);
 
 % --- Get subsampling rates and pyramid level indexes ---------------------
 function [step, pyramidLevel] = assignPyramidLevel(scales)
-
 % step: step between rectangle scales in the same level of the pyramid
 % pyramidLevel: index of pyramid level according to scale
 

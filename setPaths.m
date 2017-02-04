@@ -26,4 +26,7 @@ paths.symmax500gtVal   = fullfile(paths.symmax500,'val');
 % models
 paths.models           = fullfile(paths.output,'mil','models');
 
+% path for storing spectral features
+path.spectral          = fullfile(paths.output, 'spectral');
+
 

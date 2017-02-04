@@ -1,4 +1,4 @@
-function [sPb,eigVec] = computeSpectralFeature(psym,nvec,radius,sigmaW,sigmaOE)
+function [spb,eigVec] = computeSpectralFeature(psym,nvec,radius,sigmaW,sigmaOE)
 % function [sPb,eigVec] = computeSpectralFeature(psym,nvec,radius,sigmaW,sigmaOE)
 % 
 % Calculate spectral feature. Code based on the code for Berkeley global
@@ -69,7 +69,7 @@ dtheta  = pi/norient;
 ch_per  = [2 3 4 5 6 7 8 1];     % change theta sequence to [0,pi) clockwise
 
 eigVec = zeros(height,width,nvec-1);
-sPb    = zeros(height, width, norient);
+spb    = zeros(height, width, norient);
 for v = 1 : nvec
     if EigVal(v) > 0,
         eigVec(:,:,v) = vect(:,:,v)/sqrt(EigVal(v));
@@ -78,7 +78,7 @@ for v = 1 : nvec
         for o = 1 : norient,
             theta = dtheta*o;
             f = oeFilter(sigmaOE, support, theta, deriv, hil);
-            sPb(:,:,ch_per(o)) = sPb(:,:,ch_per(o)) + abs(applyFilter(f, eigVec(:,:,v)));
+            spb(:,:,ch_per(o)) = spb(:,:,ch_per(o)) + abs(applyFilter(f, eigVec(:,:,v)));
         end
     end
 end
