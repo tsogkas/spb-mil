@@ -42,7 +42,7 @@ for m=1:numel(models)
         case 'lindeberg'
             models{m} = struct('name',models{m});
         otherwise % MIL model
-            tmp = load(fullfile(paths.modelsMIL, models{m}.name));
+            tmp = load(fullfile(paths.models, models{m}.name));
             models{m} = tmp.spbModel;
     end
     models{m}.stats.cntR = zeros(opts.nThresh, opts.nImages);
@@ -195,19 +195,19 @@ function [odsP, odsR, odsF, odsT, oisP, oisR, oisF, AP] = computeDatasetStats(st
 % ii) OIS: F-measure for an image-specific optimal threshold.
 % iii)AP:  Average precision - equivalent to AUC (area under curve).
 
-% ODS scores
+% ODS scores (scalars)
 P = sum(stats.cntP,1) ./ max(eps, sum(stats.sumP,1));
 R = sum(stats.cntR,1) ./ max(eps, sum(stats.sumR,1));
 F = fmeasure(P,R);
 [odsP,odsR,odsF,odsT] = findBestPRF(P,R,opts.thresh);
 
-% OIS scores
+% OIS scores (scalars)
 [~,indMaxF] = max(F,[],2);
 oisP = sum(stats.cntP(:,indMaxF)) ./ max(eps, sum(stats.sumP(:,indMaxF)));
 oisR = sum(stats.cntR(:,indMaxF)) ./ max(eps, sum(stats.sumR(:,indMaxF)));
 oisF = fmeasure(oisP,oisR);
 
-% AP score
+% AP score (scalar)
 AP = interp1(R,P, 0:0.01:1); 
 AP = sum(AP(~isnan(AP)))/100;
 

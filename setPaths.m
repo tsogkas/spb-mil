@@ -10,7 +10,6 @@ paths.root             = fileparts(mfilename('fullpath'));
 
 % data
 paths.data             = fullfile(paths.root, 'data');
-paths.output           = fullfile(paths.root, 'output');
 paths.bsds500          = fullfile(paths.data,'BSDS500');
 paths.bsds500gtTrain   = fullfile(paths.bsds500,'groundtruth','train');
 paths.bsds500gtTest    = fullfile(paths.bsds500,'groundtruth','test');
@@ -24,9 +23,12 @@ paths.symmax500gtTest  = fullfile(paths.symmax500,'test');
 paths.symmax500gtVal   = fullfile(paths.symmax500,'val');
 
 % models
-paths.models           = fullfile(paths.output,'mil','models');
+paths.models           = fullfile(paths.output,'models');
 
 % path for storing spectral features
 path.spectral          = fullfile(paths.output, 'spectral');
 
+% output/results
+paths.output           = fullfile(paths.root, 'output');
+psths.plots            = fullfile(paths.output, 'plots');
 
