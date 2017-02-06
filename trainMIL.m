@@ -134,6 +134,8 @@ function [f,y] = getSamples(trainImages,featureSet,nSamplesPerImage,sampling,sla
 % -------------------------------------------------------------------------
 assert(slack>0,'slack must be a positive number!');
 assert(nSamplesPerImage>0,'number of samples per image must be positive!');
+paths = setPaths();
+
 disp(['Using ' num2str(nSamplesPerImage) ' samples per image'])
 nImages = numel(trainImages);
 y = []; f = [];
@@ -142,10 +144,21 @@ ticStart = tic;
 for i = 1:nImages    
     if isfield(trainImages(i), 'isdir') 
         % Read image and groundtruth from disk
-        [~,imageName] = fileparts(trainImages(i).name);
-        img = im2double(imread(trainImages(i).name));
-        sgt = load(['gt_' imageName '.mat']); sgt = sgt.gt; 
-        gt  = load([imageName '.mat']); gt = gt.groundTruth;
+        if exist(fullfile(paths.BSDS500imTrain, trainImages(i).name),'file')
+            imgPath = paths.BSDS500imTrain;
+            gtPath  = paths.BSDS500gtTrain;
+            sgtPath = paths.SYMMAX500gtTrain;
+        elseif exist(fullfile(paths.BSDS500imVal, trainImages(i).name),'file')
+            imgPath = paths.BSDS500imVal;
+            gtPath  = paths.BSDS500gtVal;
+            sgtPath = paths.SYMMAX500gtVal;
+        else
+            error('Image file not found!')
+        end
+        [~,iid] = fileparts(trainImages(i).name);
+        img = im2double(imread(fullfile(imgPath, trainImages(i).name)));
+        sgt = load(fullfile(sgtPath, ['gt_' iid '.mat'])); sgt = sgt.gt; 
+        gt  = load(fullfile(gtPath, [iid '.mat'])); gt = gt.groundTruth;
         sgt = bwmorph(sgt,'thin','inf');
         bgt = false(size(gt{1}.Boundaries));
         for s=1:numel(gt)
@@ -165,11 +178,11 @@ for i = 1:nImages
     
     % Compute histogram and spectral features
     if strcmp(featureSet,'gray'), img = rgb2gray(img); end
-    fprintf('Sampling image %d/%d (iid = %s)...', i, length(trainImages), imageName);
+    fprintf('Sampling image %d/%d (iid = %s)...', i, length(trainImages), iid);
     histf       = computeHistogramFeatures(img,true);
     [height,width,nOrient,nScales,~] = size(histf.dlc);
     if strcmp(featureSet,'spectral')
-        spectralFeat = load(['spectral_' imageName '.mat']);
+        spectralFeat = load(['spectral_' iid '.mat']);
         spectralFeat = repmat(spectralFeat.spectral,[1 1 1 nScales]);
     else
         spectralFeat = [];
