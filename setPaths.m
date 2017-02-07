@@ -30,5 +30,5 @@ path.spectral          = fullfile(paths.output, 'spectral');
 
 % output/results
 paths.output           = fullfile(paths.root, 'output');
-psths.plots            = fullfile(paths.output, 'plots');
+paths.plots            = fullfile(paths.output, 'plots');
 
