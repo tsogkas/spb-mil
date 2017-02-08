@@ -1,4 +1,4 @@
-function features = computeHistogramFeatures(im)
+function features = computeHistogramFeatures(im,varargin)
 % Extracts color,brighteness and texture features based on chi-square
 % histogram differences.
 % 
@@ -12,6 +12,7 @@ opts.fine    = true;       % compute features at finer scale
 opts.usechi2 = [1 1 1 1];  % use chi-square distance or other
 opts.smooth  = 'savgol';   % use savgol filtering 
 opts.ratio   = 2;          % ratio between rectangle filter sides
+opts.csim    = [];
 opts         = parseVarargin(opts, varargin);
 
 scales  = [6:2:14, 16:4:28, 32:8:48]; if opts.fine, scales = [4, scales]; end
@@ -50,7 +51,7 @@ for s=1:nScales
         imrot   = imrot(pad+1-hMargin:end-pad+hMargin,pad+1-wMargin:end-pad+wMargin,:);
         for c=1:nChannels
             hgrad = computeHistogramGradient(imrot(:,:,c),nBins(c),...
-                scale,thetas(o),[h0,w0],opts.usechi2(c),opts.smooth,csim,ratio);            
+                scale,thetas(o),[h0,w0],opts.usechi2(c),opts.smooth,opts.csim,opts.ratio);            
             if size(hgrad,1)~=h || size(hgrad,2)~=w
                 hgrad = imresize(hgrad, [h,w],'bilinear');
             end

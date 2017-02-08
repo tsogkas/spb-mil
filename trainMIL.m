@@ -1,4 +1,4 @@
-function spbModel = trainMIL(varargin)
+function model = trainMIL(varargin)
 % TRAINMIL Train symmetry detector using Multiple Instance Learning.
 % 
 %   spbModel = TRAINMIL(trainOpts), trainOpts can either be a cell array,
@@ -15,7 +15,7 @@ function spbModel = trainMIL(varargin)
 %                     ['nor','max','log'] {'nor'}.
 %   nOptIter:         maximum number of optimization iterations {200}.
 %   sampling:         one of ['random','balanced','boundary'] {balanced}.
-%   slack:            determines the area around groundtruth ridge pixels, 
+%   maxDist:          determines the area around groundtruth ridge pixels, 
 %                     from where we do not choose training samples.
 % 
 %   OUTPUTS
@@ -38,22 +38,22 @@ function spbModel = trainMIL(varargin)
 paths = setPaths;
 opts.nSamplesPerImage = 1e3;    % number of samples per image
 opts.tag        = [];           % results description
-opts.trainSet   = 'trainval';
+opts.trainSet   = 'train';
 opts.featureSet = 'color';
 opts.cost       = 'nor';        % cost function to optimize
 opts.nOptIter   = 200;          % number of optimization iterations
 opts.sampling   = 'balanced';
-opts.slack      = 3;
+opts.maxDist    = 3;
 opts            = parseVarargin(opts, varargin);
 
 % Setup image files or data used for training. If we provide a struct
 % containing image and groundtruth data, then opts.imageList contains the
 % data and opts.trainSet is inferred by the size of opts.imageList.
 if ischar(opts.trainSet) && strcmp(opts.trainSet, 'train')
-    opts.imageList = dir(fullfile(paths.bsds500imTrain, '*jpg'));
+    opts.imageList = dir(fullfile(paths.bsds500im,'train', '*jpg'));
 elseif ischar(opts.trainSet) && strcmp(opts.trainSet, 'trainval')
-    opts.imageList = [dir(fullfile(paths.bsds500imTrain, '*jpg'));...
-                      dir(fullfile(paths.bsds500imVal,   '*jpg'))];
+    opts.imageList = [dir(fullfile(paths.bsds500im,'train', '*jpg'));...
+                      dir(fullfile(paths.bsds500im,'val',   '*jpg'))];
 elseif isstruct(opts.trainSet) 
     opts.imageList = opts.trainSet;
     if numel(opts.trainSet) == 200, opts.trainSet = 'train';
@@ -66,28 +66,32 @@ end
     
 % Build model name out of parameters --------------------------------------
 assert(ismember(opts.cost,{'nor','max','log'}),'Invalid cost function');
-spbModel.opts = opts;
-spbModel.name = sprintf('spbModel_%dK_%s_%s_%s_%s', ...
-    num2str(opts.nSamplesPerImage),opts.featureSet,opts.cost,opts.sampling,opts.trainSet);
-if ~isempty(tag), spbModel.name = [spbModel.name '_' tag]; end
-spbModelPath  = fullfile(paths.models,spbModel.name);
+model.opts = opts;
+model.name = sprintf('spbModel-%d-%s-%s-%s-%s', ...
+    opts.nSamplesPerImage,opts.featureSet,opts.cost,opts.sampling,opts.trainSet);
+if ~isempty(opts.tag), model.name = [model.name '-' opts.tag]; end
+model.name = [model.name '.mat'];
+modelPath  = fullfile(paths.spbmil.models,model.name);
+mkdir(paths.spbmil.models); % create directory 
 
 % Try to load existing model ----------------------------------------------
-if exist(spbModelPath,'file')
+if exist(modelPath,'file')
     warning('You have already trained a model using this configuration. Loading trained model...')
-    spbModel = load(spbModelPath,'spbModel'); spbModel = spbModel.spbModel;
+    model = load(modelPath,'spbModel'); model = model.model;
     return
 else
     disp('Setup successful. Training starting now...')    
 end
             
 % Sample features and labels (optional retraining) ------------------------
-samplesPath = fullfile(paths.models,['samples_' num2str(opts.nSamplesPerImage) 'K_' sampling]);
-if ~isempty(tag), samplesPath = [samplesPath '_' tag]; end
+samplesPath = fullfile(paths.spbmil.models,...
+    ['samples-' num2str(opts.nSamplesPerImage) '-' opts.sampling]);
+if ~isempty(opts.tag), samplesPath = [samplesPath '-' opts.tag]; end
+samplesPath = [samplesPath '.mat'];
 try
     tmp = load(samplesPath,'x','y'); x = tmp.x; y = tmp.y; clear tmp;
 catch
-    [x,y] = getSamples(opts.imageList,opts.featureSet,opts.nSamplesPerImage,opts.sampling,opts.slack);
+    [x,y] = getSamples(opts.imageList,opts.featureSet,opts.nSamplesPerImage,opts.sampling,opts.maxDist);
     save(samplesPath,'x','y','-v7.3');
 end
 x = x(:,:,getFeatureSubset(featureSet));
@@ -122,17 +126,17 @@ end
 % De-normalize beta coefficients ------------------------------------------
 xstd            = xstd';
 w               = w./xstd;
-spbModel.xstd   = xstd;
-spbModel.w      = w;
-spbModel.w_0    = w_0;
-spbModel.loglikelihood = L;
-save(spbModelPath,'spbModel')   % save results
+model.xstd   = xstd;
+model.w      = w;
+model.w_0    = w_0;
+model.loglikelihood = L;
+save(modelPath,'spbModel')   % save results
 
 
 % -------------------------------------------------------------------------
-function [f,y] = getSamples(trainImages,featureSet,nSamplesPerImage,sampling,slack)
+function [f,y] = getSamples(trainImages,featureSet,nSamplesPerImage,sampling,maxDist)
 % -------------------------------------------------------------------------
-assert(slack>0,'slack must be a positive number!');
+assert(maxDist>0,'maxDist must be a positive number!');
 assert(nSamplesPerImage>0,'number of samples per image must be positive!');
 paths = setPaths();
 
@@ -144,14 +148,14 @@ ticStart = tic;
 for i = 1:nImages    
     if isfield(trainImages(i), 'isdir') 
         % Read image and groundtruth from disk
-        if exist(fullfile(paths.BSDS500imTrain, trainImages(i).name),'file')
-            imgPath = paths.BSDS500imTrain;
-            gtPath  = paths.BSDS500gtTrain;
-            sgtPath = paths.SYMMAX500gtTrain;
-        elseif exist(fullfile(paths.BSDS500imVal, trainImages(i).name),'file')
-            imgPath = paths.BSDS500imVal;
-            gtPath  = paths.BSDS500gtVal;
-            sgtPath = paths.SYMMAX500gtVal;
+        if exist(fullfile(paths.bsds500im,'train',trainImages(i).name),'file')
+            imgPath = fullfile(paths.bsds500im,'train');
+            gtPath  = fullfile(paths.bsds500gt,'train');
+            sgtPath = fullfile(paths.symmax500,'train');
+        elseif exist(fullfile(paths.bsds500im,'val', trainImages(i).name),'file')
+            imgPath = fullfile(paths.bsds500im,'val');
+            gtPath  = fullfile(paths.bsds500gt,'val');
+            sgtPath = fullfile(paths.symmax500,'val');
         else
             error('Image file not found!')
         end
@@ -162,7 +166,7 @@ for i = 1:nImages
         sgt = bwmorph(sgt,'thin','inf');
         bgt = false(size(gt{1}.Boundaries));
         for s=1:numel(gt)
-            bgt = bgt | gt{i}.Boundaries;
+            bgt = bgt | gt{s}.Boundaries;
         end
     else 
         % Read image and groundtruth from struct
@@ -178,37 +182,35 @@ for i = 1:nImages
     
     % Compute histogram and spectral features
     if strcmp(featureSet,'gray'), img = rgb2gray(img); end
-    fprintf('Sampling image %d/%d (iid = %s)...', i, length(trainImages), iid);
-    histf       = computeHistogramFeatures(img,true);
-    [height,width,nOrient,nScales,~] = size(histf.dlc);
+    histf       = computeHistogramFeatures(img);
+    [H,W,nOrient,nScales,~] = size(histf.dlc);
     if strcmp(featureSet,'spectral')
         spectralFeat = load(['spectral_' iid '.mat']);
         spectralFeat = repmat(spectralFeat.spectral,[1 1 1 nScales]);
     else
         spectralFeat = [];
     end
-    features = cat(5, ones(height,width,nOrient,nScales,1,'single'),...
+    features = cat(5, ones(H,W,nOrient,nScales,1,'single'),...
                     histf.dlc, histf.drc, histf.dlr,spectralFeat);
-    features = reshape(features,height*width,nOrient*nScales,[]);
+    features = reshape(features,H*W,nOrient*nScales,[]);
 
     % Sample features
     distanceMap = bwdist(sgt);
-    ind = getSampleIndexes(sgt,distanceMap,nSamplesPerImage,slack,sampling,boundaries);
-    fprintf('Added %d/%d positives and %d/%d negatives for a total of %d samples.\n',...
-            nnz(sgt(ind)),nnz(sgt),nnz(~sgt(ind)),nnz(~sgt),numel(ind));
+    ind = getSampleIndexes(sgt,distanceMap,nSamplesPerImage,maxDist,sampling,bgt);
 
     y = cat(1,y,sgt(ind));
     f = cat(1,f,features(ind,:,:));
-    progress('Storing sample features...',i,nImages,ticStart,0);
+    msg = sprintf('Stored sampled features (iid = %s)...',iid);
+    progress(msg,i,nImages,ticStart,0);
 end
 
 
 % -------------------------------------------------------------------------
-function ind = getSampleIndexes(sgt,distanceMap,nSamplesPerImage,slack,sampling,boundaries)
+function ind = getSampleIndexes(sgt,distanceMap,nSamplesPerImage,maxDist,sampling,boundaries)
 % -------------------------------------------------------------------------
 % Get linear indexes of training instances depending on the sampling scheme
 indPos   = find(sgt);    
-indNeg   = find(distanceMap>slack);
+indNeg   = find(distanceMap>maxDist);
 nPos     = numel(indPos);
 nNeg     = numel(indNeg);
 switch sampling
