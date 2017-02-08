@@ -170,19 +170,20 @@ for i = 1:nImages
         end
     else 
         % Read image and groundtruth from struct
+        iid = trainImages(i).iid;
         img = trainImages(i).img;
         [H,W,~] = size(img);
         sgt = false(H,W);
         bgt = false(H,W);
         for s=1:size(trainImages(i).seg,3)
-            sgt = sgt | trainImages(i).seg(:,:,s);
+            sgt = sgt | trainImages(i).pts(:,:,s);
             bgt = bgt | trainImages(i).bnd(:,:,s);
         end
     end
     
     % Compute histogram and spectral features
     if strcmp(featureSet,'gray'), img = rgb2gray(img); end
-    histf       = computeHistogramFeatures(img);
+    histf = computeHistogramFeatures(img);
     [H,W,nOrient,nScales,~] = size(histf.dlc);
     if strcmp(featureSet,'spectral')
         spectralFeat = load(['spectral_' iid '.mat']);
