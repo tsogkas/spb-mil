@@ -4,31 +4,21 @@ function paths = setPaths()
 %   paths = setPaths()
 % 
 %   Stavros Tsogkas, <tsogkas@cs.toronto.edu>
-%   Last update: January 2017
+%   Last update: February 2017
 
-paths.root             = fileparts(mfilename('fullpath'));
+paths.spbmil.root      = fileparts(mfilename('fullpath'));
 
 % data
 paths.data             = fullfile(paths.root, 'data');
 paths.bsds500          = fullfile(paths.data,'BSDS500');
-paths.bsds500gtTrain   = fullfile(paths.bsds500,'groundtruth','train');
-paths.bsds500gtTest    = fullfile(paths.bsds500,'groundtruth','test');
-paths.bsds500gtVal     = fullfile(paths.bsds500,'groundtruth','val');
-paths.bsds500imTrain   = fullfile(paths.bsds500,'images','train');
-paths.bsds500imTest    = fullfile(paths.bsds500,'images','test');
-paths.bsds500imVal     = fullfile(paths.bsds500,'images','val');
+paths.bsds500gt        = fullfile(paths.bsds500, 'groundtruth');
+paths.bsds500im        = fullfile(paths.bsds500, 'images');
 paths.symmax500        = fullfile(paths.data,'SYMMAX500');
-paths.symmax500gtTrain = fullfile(paths.symmax500,'train');
-paths.symmax500gtTest  = fullfile(paths.symmax500,'test');
-paths.symmax500gtVal   = fullfile(paths.symmax500,'val');
-
-% models
-paths.models           = fullfile(paths.output,'models');
-
-% path for storing spectral features
-path.spectral          = fullfile(paths.output, 'spectral');
 
 % output/results
-paths.output           = fullfile(paths.root, 'output');
-psths.plots            = fullfile(paths.output, 'plots');
+paths.spbmil.output    = fullfile(paths.spbmil.root, 'output');
+psths.spbmil.plots     = fullfile(paths.spbmil.output, 'plots');
+paths.spbmil.models    = fullfile(paths.spbmil.output,'models');
+paths.spbmil.spectral  = fullfile(paths.spbmil.output, 'spectral');
+
 
