@@ -2,11 +2,6 @@ function testSPB(models, varargin)
 % TESTSPB Function for comparing performance of various
 %   symmetry/ridge/medial axis detection algorithms.
 
-% TODO: add iid field in stats
-% TODO: add dataset field in stats
-% TODO: save model back to disk
-% TODO: 
-
 % Default training options ------------------------------------------------
 opts = {'dataset',   'BSDS500',...
         'set',       'val',...   % 'val' or 'test'
@@ -29,7 +24,9 @@ elseif ischar(opts.set) && strcmp(opts.set, 'test')
 elseif isstruct(opts.set)
     disp('Data provided in struct form')
     imageList = opts.set;
-    if numel(imageList) == 100, opts.set = 'val'; else opts.set = 'test'; end
+    if strcmp(opts.dataset, 'BSDS500')
+        if numel(imageList) == 100, opts.set = 'val'; else opts.set = 'test'; end
+    end
 else
     error('set can be ''val'', ''test'', or a struct containing test data')
 end
@@ -48,13 +45,19 @@ for m=1:numel(models)
             clear tmp1 tmp2
         case 'lindeberg'
             models{m} = struct('name',models{m});
-        otherwise % MIL model
-            if exist(fullfile(paths.spbmil.models, models{m}),'file')
+        otherwise 
+            if exist(fullfile(paths.spbmil.models, models{m}),'file') % MIL model 
                 tmp = load(fullfile(paths.spbmil.models, models{m}));
                 models{m} = tmp.model;
             elseif exist(models{m},'file')
                 tmp = load(models{m});
-                models{m} = tmp.model;
+                if isfield(tmp,'model')     % MIL model 
+                    models{m} = tmp.model;
+                elseif isfield(tmp,'net')   % DagNN model 
+                    models{m}.trainStats = stats;
+                    models{m}.name = 'deepskel';
+                    models{m}.net = dagnn.DagNN.loadobj(tmp.net);
+                end
             end
     end
     models{m}.stats.cntR = zeros(opts.nThresh, opts.nImages);
@@ -65,9 +68,9 @@ for m=1:numel(models)
 end
 
 % Evaluate models on test images ------------------------------------------
-opts.thresh  = linspace(1/(opts.nThresh+1),1-1/(opts.nThresh+1),opts.nThresh)';
+opts.thresh = linspace(1/(opts.nThresh+1),1-1/(opts.nThresh+1),opts.nThresh)';
+ticStart = tic;
 for i=1:opts.nImages
-    fprintf('Testing on image %d/%d from BSDS500 %s set\n', i, opts.nImages, opts.set);
     if isfield(imageList(i), 'isdir')
         % Load image and groundtruth data from disk
         [~,iid,~] = fileparts(imageList(i).name);
@@ -87,6 +90,8 @@ for i=1:opts.nImages
                 spb = evaluateLevinshtein(models{m}, img);
             case 'lindeberg'
                 spb = evaluateLindeberg(img);
+            case 'deepskel'
+                spb = evaluateDeepSkel(models{m},img);
             otherwise % MIL 
                 spb = evaluateModelMIL(models{m},img,features,iid,opts);
         end
@@ -94,6 +99,8 @@ for i=1:opts.nImages
          models{m}.stats.cntR(i,:), models{m}.stats.sumR(i,:),...
          models{m}.stats.scores(i,:)] = computeImageStats(spb,gt,opts);
     end
+    msg = sprintf('Testing on BSDS500 %s set\n', opts.set);
+    progress(msg,i,opts.nImages,ticStart,1);
 end
 
 % Compute dataset-wide stats
@@ -115,6 +122,9 @@ end
 
 % Plot precision-recall curves --------------------------------------------
 plotPrecisionRecall(0) 
+
+function spb = evaluateDeepSkel(model,img)
+model.net.eval({'input',img});
 
 
 % -------------------------------------------------------------------------
