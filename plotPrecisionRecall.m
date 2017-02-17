@@ -1,4 +1,4 @@
-function plotPrecisionRecall(models)
+function plotPrecisionRecall(models,dataset,set)
 % PLOTPRECISIONRECALL Plot precision-recall curves and print figure. 
 % 
 %   PLOTPRECISIONRECALL(models) where models can be one of the following:
@@ -13,9 +13,11 @@ function plotPrecisionRecall(models)
 % Stavros Tsogkas <tsogkas@cs.toronto.edu>
 % Last update: February 2017
 
+if nargin < 2, dataset = 'BSDS500'; end
+if nargin < 3, set = 'val'; end
 
 paths = setPaths();
-models = loadModels(models, paths);
+models = loadModels(models, paths, dataset, set);
 h = setupFigure;
 hpr = zeros(numel(models),1); % pr plot handles
 f   = zeros(numel(models),1); % best f-measure 
@@ -32,9 +34,9 @@ print(h,'-depsc2',fullfile(paths.plots, 'pr'))
 close(h)
 
 
-% --- Plot precision-recall curve for a feature combination ---------------
+% -------------------------------------------------------------------------
 function [h, bestF, txt] = plotpr(model,lineWidth,markerSize)
-
+% -------------------------------------------------------------------------
 if nargin < 2, lineWidth  = 2; end
 if nargin < 3, markerSize = 8; end
 
@@ -57,9 +59,9 @@ h = plot(bestP,bestR,[color 'o'],'MarkerFaceColor',color,'MarkerSize',markerSize
 txt = model2legend(model,bestF);
 
 
-% --- Setup figure for plotting -------------------------------------------
+% -------------------------------------------------------------------------
 function h = setupFigure()
-
+% -------------------------------------------------------------------------
 h = figure; clf;
 hold on; box on; grid on;
 set(gca,'Fontsize',14);
@@ -76,13 +78,39 @@ f_gt        = fmeasure(r_gt,p_gt);
 [C,cl]      = contour(0:0.01:1,0:0.01:1,f_gt,.1:.1:.8);
 clabel(C,cl)
 
+% -------------------------------------------------------------------------
 function F = fmeasure(P,R), F = 2 .* P .* R ./ max(eps, P+R);
+% -------------------------------------------------------------------------
 
+% -------------------------------------------------------------------------
 function c = model2color(model)
+% -------------------------------------------------------------------------
+if isfield(model,'opts') && isfield(model.opts, 'featureSet')
+    switch model.opts.featureSet
+        case 'color'
+            c = 'c';
+        case 'gray'
+            c = 'g';
+        case {'no-texture','no_texture'}
+            c = 'k';
+        case 'spectral' 
+    end
+else
+    % TODO: add handling of deepskeleton models
+end
 
+% -------------------------------------------------------------------------
 function t = model2legend(model,f)
+% -------------------------------------------------------------------------
+if isfield(model,'opts') && isfield(model.opts, 'featureSet')
+    t = sprintf('MIL-%s: F=%.2f', model.opts.featureSet, f);
+else
+    % TODO: add handling of deepskeleton models
+end
 
-function models = loadModels(models,paths)
+% -------------------------------------------------------------------------
+function models = loadModels(models,paths,dataset,set)
+% -------------------------------------------------------------------------
 for m=1:numel(models)
     if ischar(models{m})
         if exist(models{m}, 'file')
@@ -93,6 +121,12 @@ for m=1:numel(models)
             error([models{m} ' was not found'])
         end
         models{m} = tmp.model; % this depends on the name of the results struct
+    end
+    % Create convenient stats field for requested dataset and subset
+    if isfield(models{m}, dataset) && isfield(models{m}.(dataset), set)
+        models{m}.stats = models{m}.(dataset).(set);
+    else
+        error(['Model has not been evaluated on ' dataset ' ' set])
     end
 end
 

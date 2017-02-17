@@ -19,7 +19,7 @@ function model = trainMIL(varargin)
 %                     from where we do not choose training samples.
 % 
 %   OUTPUTS
-%   spbModel: Struct containing learned weights and other training information.
+%   model: Struct containing learned weights and other training information.
 % 
 %   ADDITIONAL INFO
 %   xstd:     Standard deviation of the vector weights.
@@ -67,17 +67,16 @@ end
 % Build model name out of parameters --------------------------------------
 assert(ismember(opts.cost,{'nor','max','log'}),'Invalid cost function');
 model.opts = opts;
-model.name = sprintf('spbModel-%d-%s-%s-%s-%s', ...
+model.name = sprintf('model-%d-%s-%s-%s-%s', ...
     opts.nSamplesPerImage,opts.featureSet,opts.cost,opts.sampling,opts.trainSet);
 if ~isempty(opts.tag), model.name = [model.name '-' opts.tag]; end
-model.name = [model.name '.mat'];
 modelPath  = fullfile(paths.spbmil.models,model.name);
 mkdir(paths.spbmil.models); % create directory 
 
 % Try to load existing model ----------------------------------------------
 if exist(modelPath,'file')
     warning('You have already trained a model using this configuration. Loading trained model...')
-    model = load(modelPath,'spbModel'); model = model.model;
+    model = load(modelPath,'model'); model = model.model;
     return
 else
     disp('Setup successful. Training starting now...')    
@@ -87,14 +86,15 @@ end
 samplesPath = fullfile(paths.spbmil.models,...
     ['samples-' num2str(opts.nSamplesPerImage) '-' opts.sampling]);
 if ~isempty(opts.tag), samplesPath = [samplesPath '-' opts.tag]; end
-samplesPath = [samplesPath '.mat'];
 try
+    disp('Loading training samples...')
     tmp = load(samplesPath,'x','y'); x = tmp.x; y = tmp.y; clear tmp;
 catch
+    disp('File not found, extracting training samples from images...')
     [x,y] = getSamples(opts.imageList,opts.featureSet,opts.nSamplesPerImage,opts.sampling,opts.maxDist);
     save(samplesPath,'x','y','-v7.3');
 end
-x = x(:,:,getFeatureSubset(featureSet));
+x = x(:,:,getFeatureSubset(opts.featureSet));
 
 % Normalize features to unit variance -------------------------------------
 [nSamples,nInstPerBag,nDim] = size(x);
@@ -109,28 +109,18 @@ disp('Fitting model...')
 nIterDone = 0;  % sometimes minimize stops prematurely
 while nIterDone<20
     w_0 = rand(nDim,1);
-    [w,L,nIterDone] = minimize(w_0,'loglikelihood',nOptIter,cost,y,x,xReshaped,true); % weights and log-likelihood vector
+    [w,L,nIterDone] = ...
+        minimize(w_0,'loglikelihood',opts.nOptIter,opts.cost,y,x,xReshaped,true); % weights and log-likelihood vector
 end
 
-%     % --- Calculate probabilites for bag instances and bags (Noisy-OR)
-%     disp('Calculating posterior probabilities...')
-%     s1          = size(xReshaped,1);
-%     in_prd      = reshape(xReshaped*w,[s1/nInstPerBag,nInstPerBag]);
-%     p_inst      = 1./(1 + exp(-in_prd));
-%     % using loglikeMIL or loglikeNOR
-%     logp_bags   = sum(log(1-p_inst+eps),2);
-%     p_bags      = 1-exp(logp_bags);
-%     % % using loglikeMAX
-%     [p_bags, instIdx] = max(p_inst,[],2);
-
 % De-normalize beta coefficients ------------------------------------------
-xstd            = xstd';
-w               = w./xstd;
+xstd         = xstd';
+w            = w./xstd;
 model.xstd   = xstd;
 model.w      = w;
 model.w_0    = w_0;
 model.loglikelihood = L;
-save(modelPath,'spbModel')   % save results
+save(modelPath,'model')   % save results
 
 
 % -------------------------------------------------------------------------
@@ -387,7 +377,7 @@ end
 fprintf('\r');
 
 % -------------------------------------------------------------------------
-function [L, dL] = loglikelihood(mode,w,y,x,xReshaped,deriv)
+function [L, dL] = loglikelihood(w,mode,y,x,xReshaped,deriv)
 % -------------------------------------------------------------------------
 % [lli, lliDeriv] = loglikeNOR(mode,w,y,x,xReshaped,deriv)
 %

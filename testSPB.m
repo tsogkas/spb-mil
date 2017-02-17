@@ -1,35 +1,42 @@
 function testSPB(models, varargin)
 % TESTSPB Function for comparing performance of various
 %   symmetry/ridge/medial axis detection algorithms.
-% 
 
+% TODO: add iid field in stats
+% TODO: add dataset field in stats
+% TODO: save model back to disk
+% TODO: 
 
 % Default training options ------------------------------------------------
-opts = { 'set',       'val',...   % 'val' or 'test'
-         'visualize', false,...
-         'nThresh',   30,...      % #thresholds used for computing p-r
-         'maxDist',   0.01        % controls max distance of an accurately 
-       };                         % detected point from groundtruth.
+opts = {'dataset',   'BSDS500',...
+        'set',       'val',...   % 'val' or 'test'
+        'visualize', false,...
+        'nThresh',   30,...      % #thresholds used for computing p-r
+        'maxDist',   0.01        % controls max distance of an accurately 
+       };                        % detected point from groundtruth.
 opts = parseVarargin(opts,varargin,'struct');
 
 % Read test images --------------------------------------------------------
 paths = setPaths();
 if ischar(opts.set) && strcmp(opts.set, 'val')
-    imageList = dir(fullfile(paths.bsds500imVal, '*jpg'));
-    imPath    = paths.bsds500imVal;
-    gtPath    = paths.symmax500gtVal;
+    imPath    = fullfile(paths.bsds500im,'val');
+    gtPath    = fullfile(paths.symmax500,'val');
+    imageList = dir(fullfile(imPath, '*jpg'));
 elseif ischar(opts.set) && strcmp(opts.set, 'test')
-    imageList = dir(fullfile(paths.bsds500imTest, '*jpg'));
-    imPath    = paths.bsds500imTest;
-    gtPath    = paths.symmax500gtTest;
+    imPath    = fullfile(paths.bsds500im,'test');
+    gtPath    = fullfile(paths.symmax500,'test');
+    imageList = dir(fullfile(imPath, '*jpg'));
 elseif isstruct(opts.set)
     disp('Data provided in struct form')
     imageList = opts.set;
+    if numel(imageList) == 100, opts.set = 'val'; else opts.set = 'test'; end
 else
     error('set can be ''val'', ''test'', or a struct containing test data')
 end
+opts.nImages = numel(imageList);
 
 % Load models and initialize stats ----------------------------------------
+if ~iscell(models), models = {models}; end
 for m=1:numel(models)
     switch models{m}
         case 'levinstein'
@@ -42,8 +49,13 @@ for m=1:numel(models)
         case 'lindeberg'
             models{m} = struct('name',models{m});
         otherwise % MIL model
-            tmp = load(fullfile(paths.models, models{m}.name));
-            models{m} = tmp.spbModel;
+            if exist(fullfile(paths.spbmil.models, models{m}),'file')
+                tmp = load(fullfile(paths.spbmil.models, models{m}));
+                models{m} = tmp.model;
+            elseif exist(models{m},'file')
+                tmp = load(models{m});
+                models{m} = tmp.model;
+            end
     end
     models{m}.stats.cntR = zeros(opts.nThresh, opts.nImages);
     models{m}.stats.sumR = zeros(opts.nThresh, opts.nImages);
@@ -53,7 +65,6 @@ for m=1:numel(models)
 end
 
 % Evaluate models on test images ------------------------------------------
-opts.nImages = numel(imageList);
 opts.thresh  = linspace(1/(opts.nThresh+1),1-1/(opts.nThresh+1),opts.nThresh)';
 for i=1:opts.nImages
     fprintf('Testing on image %d/%d from BSDS500 %s set\n', i, opts.nImages, opts.set);
@@ -64,7 +75,8 @@ for i=1:opts.nImages
         img = im2double(imread(fullfile(imPath,imageList(i).name)));
     else % Read image and groundtruth from struct
         img = imageList(i).img;
-        gt  = imageList(i).seg;
+        gt  = imageList(i).pts;
+        iid = imageList(i).iid;
     end
     
     % Compute features and evaluate all models
@@ -74,7 +86,7 @@ for i=1:opts.nImages
             case 'levinstein'
                 spb = evaluateLevinshtein(models{m}, img);
             case 'lindeberg'
-                spb  = evaluateLindeberg(img);
+                spb = evaluateLindeberg(img);
             otherwise % MIL 
                 spb = evaluateModelMIL(models{m},img,features,iid,opts);
         end
@@ -91,27 +103,36 @@ for m=1:numel(models)
      models{m}.stats.oisP,  models{m}.stats.oisR, ...
      models{m}.stats.oisF,  models{m}.stats.AP] = ...
         computeDatasetStats(models{m}.stats, opts);
+    % Create field with dataset-specific stats
+    models{m}.(opts.dataset).(opts.set).stats = stats;
+    models{m}.(opts.dataset).(opts.set).opts = opts;
+    models{m} = rmfield(models{m},'stats');
+    % And store results
+    modelPath = fullfile(paths.sbpmil.models, models{m}.name);
+    model = models{m};
+    save(modelPath, 'model')
 end
 
 % Plot precision-recall curves --------------------------------------------
-plotPrecisionRecall(0)  % compare methods
-plotPrecisionRecall(1)  % compare grouping
+plotPrecisionRecall(0) 
 
 
 % -------------------------------------------------------------------------
 function spb = evaluateModelMIL(model,img,histFeatures,iid,opts)
 % -------------------------------------------------------------------------
 paths = setPaths();
-if strcmp(model.featureSet, 'spectral')
+if strcmp(model.opts.featureSet, 'spectral')
     try
         spectralFeat = load(fullfile(paths.spectral,'spectral_50',opts.set,['spectral_' iid '.mat']));
         spectralFeat = single(spectralFeat.spectral);
     catch
         warning('Was not able to load spectral feature')
     end
+else
+    spectralFeat = [];
 end
-spb = spbMIL(img, 'featureSet',model.featureSet, 'fineScale',true,...
-    'w',model.w, 'histFeatures', histFeatures, 'spectralFeat',spectralFeat);
+spb = spbMIL(img, 'featureSet',model.opts.featureSet, 'fineScale',true,...
+    'w',model.w, 'histFeatures', histFeatures, 'spectralFeature',spectralFeat);
 spb = spb.thin;
 
 % -------------------------------------------------------------------------
@@ -165,9 +186,9 @@ for t = 1:numel(thresh),
     % Compute matches between symmetry map and all groundtruth maps
     accP = 0;
     for s=1:size(gt,3)
-        [match1,match2] = correspondPixels(double(bmap),double(gt),opts.maxDist);
+        [match1,match2] = correspondPixels(double(bmap),double(gt(:,:,s)),opts.maxDist);
         if opts.visualize
-            plotMatch(1,bmap,gt,match1,match2);
+            plotMatch(1,bmap,gt(:,:,s),match1,match2);
         end
         % accumulate machine matches
         accP = accP | match1;
@@ -236,20 +257,3 @@ for t = 2:numel(T)
     end
 end
 
-
-
-% ridgesCGrouped50  = fpg(ridgesC.thin,50);  % grouping 50 strongest curves
-% [statsCGrouped50]  = computeAllScores(ridgesCGrouped50, str2double(iid), gt,...
-%     nThresh,[rpbModelColor.name '_grouped50'],statsCGrouped50,i,directories.scores);
-% 
-% ridgesCGrouped100 = fpg(ridgesC.thin,100); % grouping 100 strongest curves
-% [statsCGrouped100] = computeAllScores(ridgesCGrouped100, str2double(iid), gt,...
-%     nThresh,[rpbModelColor.name '_grouped100'],statsCGrouped100,i,directories.scores);
-% 
-% ridgesSGrouped50  = fpg(ridgesS.thin,50);  % grouping 50 strongest curves + spectral
-% [statsSGrouped50] = computeAllScores(ridgesSGrouped50, str2double(iid), gt,...
-%     nThresh,[rpbModelSpectral.name '_grouped50'],statsSGrouped50,i,directories.scores);
-% 
-% ridgesSGrouped100  = fpg(ridgesS.thin,100); % grouping 100 strongest curves + spectral
-% [statsSGrouped100] = computeAllScores(ridgesSGrouped100, str2double(iid), gt,...
-%     nThresh,[rpbModelSpectral.name '_grouped100'],statsSGrouped100,i,directories.scores);
