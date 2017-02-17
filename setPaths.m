@@ -20,5 +20,3 @@ paths.spbmil.output    = fullfile(paths.spbmil.root, 'output');
 psths.spbmil.plots     = fullfile(paths.spbmil.output, 'plots');
 paths.spbmil.models    = fullfile(paths.spbmil.output,'models');
 paths.spbmil.spectral  = fullfile(paths.spbmil.output, 'spectral');
-
-
