@@ -2,7 +2,7 @@ function testSPB(models, varargin)
 % TESTSPB Function for comparing performance of various
 %   symmetry/ridge/medial axis detection algorithms.
 
-% Default training options ------------------------------------------------
+% Default testing options ------------------------------------------------
 opts = {'dataset',   'BSDS500',...
         'set',       'val',...   % 'val' or 'test'
         'visualize', false,...
@@ -35,30 +35,13 @@ opts.nImages = numel(imageList);
 % Load models and initialize stats ----------------------------------------
 if ~iscell(models), models = {models}; end
 for m=1:numel(models)
-    switch models{m}
+    switch lower(models{m})
         case 'levinstein'
-            models{m} = struct('name',models{m});
-            tmp1 = load('classifier_params_svm.mat');
-            tmp2 = load('part_classifier_params.mat');
-            models{m}.classifier_params = tmp1.classifier_params;
-            models{m}.part_classifier_params = tmp2.part_classifier_params;
-            clear tmp1 tmp2
+            models{m} = loadLevinsteinModel(models{m},paths);
         case 'lindeberg'
             models{m} = struct('name',models{m});
-        otherwise 
-            if exist(fullfile(paths.spbmil.models, models{m}),'file') % MIL model 
-                tmp = load(fullfile(paths.spbmil.models, models{m}));
-                models{m} = tmp.model;
-            elseif exist(models{m},'file')
-                tmp = load(models{m});
-                if isfield(tmp,'model')     % MIL model 
-                    models{m} = tmp.model;
-                elseif isfield(tmp,'net')   % DagNN model 
-                    models{m}.trainStats = stats;
-                    models{m}.name = 'deepskel';
-                    models{m}.net = dagnn.DagNN.loadobj(tmp.net);
-                end
-            end
+        otherwise % load MIL or CNN model
+            models{m} = loadModelFromMatFile(models{m},paths);
     end
     models{m}.stats.cntR = zeros(opts.nThresh, opts.nImages);
     models{m}.stats.sumR = zeros(opts.nThresh, opts.nImages);
@@ -82,8 +65,7 @@ for i=1:opts.nImages
         iid = imageList(i).iid;
     end
     
-    % Compute features and evaluate all models
-    features = computeHistogramFeatures(img);
+    clear features 
     for m=1:numel(models)
         switch models{m}.name
             case 'levinstein'
@@ -93,6 +75,10 @@ for i=1:opts.nImages
             case 'deepskel'
                 spb = evaluateDeepSkel(models{m},img);
             otherwise % MIL 
+                % Compute features once for all MIL models
+                if ~exist('features','var')
+                    features = computeHistogramFeatures(img);
+                end
                 spb = evaluateModelMIL(models{m},img,features,iid,opts);
         end
         [models{m}.stats.cntP(i,:), models{m}.stats.sumP(i,:),...
@@ -116,15 +102,21 @@ for m=1:numel(models)
     models{m} = rmfield(models{m},'stats');
     % And store results
     modelPath = fullfile(paths.sbpmil.models, models{m}.name);
-    model = models{m};
-    save(modelPath, 'model')
+    model = models{m}; save(modelPath, 'model')
 end
 
 % Plot precision-recall curves --------------------------------------------
 plotPrecisionRecall(0) 
 
+% -------------------------------------------------------------------------
 function spb = evaluateDeepSkel(model,img)
-model.net.eval({'input',img});
+% -------------------------------------------------------------------------
+net = model.net;
+img = bsxfun(@minus, single(img), reshape(net.meta.averageImage,1,1,[]));
+net.eval({'input',img});
+lout= net.getLayer(net.getLayerIndex('concat_fuse'));
+spb = net.vars(lout.outputIndexes);
+spb = 1-spb.value(:,:,1);
 
 
 % -------------------------------------------------------------------------
@@ -265,5 +257,29 @@ for t = 2:numel(T)
         bestF = f; bestT = Tt(indMax);
         bestP = Pt(indMax); bestR = Rt(indMax); 
     end
+end
+
+% -------------------------------------------------------------------------
+function model = loadLevinsteinModel(model,paths)
+% -------------------------------------------------------------------------
+model = struct('name',model);
+tmp1 = load('classifier_params_svm.mat');
+tmp2 = load('part_classifier_params.mat');
+model.classifier_params = tmp1.classifier_params;
+model.part_classifier_params = tmp2.part_classifier_params;
+
+% -------------------------------------------------------------------------
+function model = loadModelFromMatFile(model,paths)
+% -------------------------------------------------------------------------
+if exist(fullfile(paths.spbmil.models, model),'file') % MIL model
+    tmp = load(fullfile(paths.spbmil.models, model));
+elseif exist(model,'file')
+    tmp = load(model);
+end
+if isfield(tmp,'model')     % MIL model
+    model = tmp.model;
+elseif isfield(tmp,'net')   % DagNN model
+    model = struct('trainStats',tmp.stats, 'name','deepskel',...
+                   'net',dagnn.DagNN.loadobj(tmp.net));
 end
 
