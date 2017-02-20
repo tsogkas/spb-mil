@@ -234,7 +234,6 @@ oisF = fmeasure(oisP,oisR);
 AP = interp1(R,P, 0:0.01:1); 
 AP = sum(AP(~isnan(AP)))/100;
 
-
 % -------------------------------------------------------------------------
 function F = fmeasure(P,R), F = 2 .* P .* R ./ max(eps, P+R);
 

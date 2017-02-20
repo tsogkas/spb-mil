@@ -83,7 +83,9 @@ assert(length(w)==size(features,5),...
 features = reshape(features,height*width*nOrient*nScales,[]);
 pb = reshape(1./(1+exp(-features*w)),[height,width,nOrient,nScales]);
 [~,orientMap] = max(max(pb,[],4),[],3);
+[~,scalesMap] = max(max(pb,[],3),[],4);
 orientMap     = thetas(orientMap);
+scalesMap     = scales(scalesMap);
 for s = 1:nScales
     scale = floor(scales(s)/step(s));
     for o = 1:nOrient
@@ -101,7 +103,8 @@ p_bags      = reshape(1-exp(logp_bags),[height,width]);
 sup         = nonmax(p_bags,orientMap);
 spb.fat     = p_bags;
 spb.thin    = sup;
-spb.orientMap = orientMap;    
+spb.orientMap = orientMap;
+spb.scalesMap = scalesMap;
 
 
 
