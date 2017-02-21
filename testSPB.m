@@ -3,7 +3,7 @@ function models = testSPB(models, varargin)
 %   symmetry/ridge/medial axis detection algorithms.
 
 % Default testing options ------------------------------------------------
-opts = {'dataset',   'BSDS500',...
+opts = {'dataset',   'BMAX500',...
         'set',       'val',...   % 'val' or 'test'
         'visualize', false,...
         'nThresh',   30,...      % #thresholds used for computing p-r
@@ -24,7 +24,7 @@ elseif ischar(opts.set) && strcmp(opts.set, 'test')
 elseif isstruct(opts.set)
     disp('Data provided in struct form')
     imageList = opts.set;
-    if strcmp(opts.dataset, 'BSDS500')
+    if strcmp(opts.dataset, 'BMAX500')
         if numel(imageList) == 100, opts.set = 'val'; else opts.set = 'test'; end
     end
 else
@@ -119,11 +119,12 @@ plotPrecisionRecall(models,opts.dataset,opts.set)
 % -------------------------------------------------------------------------
 function spb = evaluateAMAT(img)
 % -------------------------------------------------------------------------
+[H,W,~] = size(img);
 img = imresize(img,0.5,'bilinear');
 img = L0Smoothing(img);
 mat = amat(img);
 spb = any(mat.axis,3); 
-spb = imresize(spb,2,'nearest');
+spb = imresize(spb,[H,W],'nearest');
 
 % -------------------------------------------------------------------------
 function spb = evaluateDeepSkel(model,img)
@@ -233,23 +234,29 @@ function [odsP, odsR, odsF, odsT, oisP, oisR, oisF, AP] = computeDatasetStats(st
 % ii) OIS: F-measure for an image-specific optimal threshold.
 % iii)AP:  Average precision - equivalent to AUC (area under curve).
 
-% ODS scores (scalars)
 P = sum(stats.cntP,1) ./ max(eps, sum(stats.sumP,1));
 R = sum(stats.cntR,1) ./ max(eps, sum(stats.sumR,1));
-F = fmeasure(P,R);
-[odsP,odsR,odsF,odsT] = findBestPRF(P,R,opts.thresh);
 
-% OIS scores (scalars)
-P = stats.cntP ./ max(eps, stats.sumP);
-R = stats.cntR ./ max(eps, stats.sumR);
-[~,indMaxF] = max(fmeasure(P,R),[],2);
-oisP = sum(stats.cntP(:,indMaxF)) ./ max(eps, sum(stats.sumP(:,indMaxF)));
-oisR = sum(stats.cntR(:,indMaxF)) ./ max(eps, sum(stats.sumR(:,indMaxF)));
-oisF = fmeasure(oisP,oisR);
+if length(P) > 1 % soft probability maps
+    % ODS scores (scalars)
+    [odsP,odsR,odsF,odsT] = findBestPRF(P,R,opts.thresh);
 
-% AP score (scalar)
-AP = interp1(R,P, 0:0.01:1); 
-AP = sum(AP(~isnan(AP)))/100;
+    % OIS scores (scalars)
+    Pi = stats.cntP ./ max(eps, stats.sumP);
+    Ri = stats.cntR ./ max(eps, stats.sumR);
+    [~,indMaxF] = max(fmeasure(Pi,Ri),[],2);
+    indMaxF = sub2ind(size(Pi), (1:size(Pi,1))', indMaxF);
+    oisP = sum(stats.cntP(indMaxF)) ./ max(eps, sum(stats.sumP(indMaxF)));
+    oisR = sum(stats.cntR(indMaxF)) ./ max(eps, sum(stats.sumR(indMaxF)));
+    oisF = fmeasure(oisP,oisR);
+
+    % AP score (scalar)
+    AP = interp1(R,P, 0:0.01:1); 
+    AP = sum(AP(~isnan(AP)))/100;
+else    % binary symmetry maps
+    odsP = P; odsR = R; odsF = fmeasure(P,R); odsT = 0.5;
+    oisP = odsP; oisR = odsR; oisF = odsF; AP = odsP;
+end
 
 % -------------------------------------------------------------------------
 function F = fmeasure(P,R), F = 2 .* P .* R ./ max(eps, P+R);

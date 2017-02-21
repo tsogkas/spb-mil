@@ -29,7 +29,7 @@ end
 % Sort by f-score, create legend and print figure
 [~,inds] = sort(f,'descend');
 legend(hpr(inds), 'Location','SouthWest', txt(inds));
-mkdir(paths.plots)
+mkdir(paths.spbmil.plots)
 print(h,'-depsc2',fullfile(paths.plots, 'pr'))
 close(h)
 
