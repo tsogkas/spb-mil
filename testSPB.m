@@ -1,4 +1,4 @@
-function testSPB(models, varargin)
+function models = testSPB(models, varargin)
 % TESTSPB Function for comparing performance of various
 %   symmetry/ridge/medial axis detection algorithms.
 
@@ -37,28 +37,34 @@ if ~iscell(models), models = {models}; end
 for m=1:numel(models)
     switch lower(models{m})
         case 'levinstein'
+            nThresh = 1;
             models{m} = loadLevinsteinModel(models{m},paths);
+        case 'amat'
+            nThresh = 1;
+            models{m} = struct('name',models{m});
         case 'lindeberg'
+            nThresh = opts.nThresh;
             models{m} = struct('name',models{m});
         otherwise % load MIL or CNN model
+            nThresh = opts.nThresh;
             models{m} = loadModelFromMatFile(models{m},paths);
     end
-    models{m}.stats.cntR = zeros(opts.nThresh, opts.nImages);
-    models{m}.stats.sumR = zeros(opts.nThresh, opts.nImages);
-    models{m}.stats.cntP = zeros(opts.nThresh, opts.nImages);
-    models{m}.stats.sumP = zeros(opts.nThresh, opts.nImages);
+    models{m}.stats.cntR = zeros(opts.nImages, nThresh);
+    models{m}.stats.sumR = zeros(opts.nImages, nThresh);
+    models{m}.stats.cntP = zeros(opts.nImages, nThresh);
+    models{m}.stats.sumP = zeros(opts.nImages, nThresh);
     models{m}.stats.scores = zeros(opts.nImages, 4); % optimal P,R,F,T for each image
 end
 
 % Evaluate models on test images ------------------------------------------
 opts.thresh = linspace(1/(opts.nThresh+1),1-1/(opts.nThresh+1),opts.nThresh)';
 ticStart = tic;
-for i=1:opts.nImages
+for i=1:1
     if isfield(imageList(i), 'isdir')
         % Load image and groundtruth data from disk
         [~,iid,~] = fileparts(imageList(i).name);
         gt  = load(fullfile(gtPath,['gt_' iid '.mat' ])); gt = gt.gt;
-        img = im2double(imread(fullfile(imPath,imageList(i).name)));
+        img = imread(fullfile(imPath,imageList(i).name));
     else % Read image and groundtruth from struct
         img = imageList(i).img;
         gt  = imageList(i).pts;
@@ -72,6 +78,8 @@ for i=1:opts.nImages
                 spb = evaluateLevinshtein(models{m}, img);
             case 'lindeberg'
                 spb = evaluateLindeberg(img);
+            case 'amat'
+                spb = evaluateAMAT(img);
             case 'deepskel'
                 spb = evaluateDeepSkel(models{m},img);
             otherwise % MIL 
@@ -85,28 +93,37 @@ for i=1:opts.nImages
          models{m}.stats.cntR(i,:), models{m}.stats.sumR(i,:),...
          models{m}.stats.scores(i,:)] = computeImageStats(spb,gt,opts);
     end
-    msg = sprintf('Testing on BSDS500 %s set\n', opts.set);
+    msg = sprintf('Testing on BSDS500 %s set', opts.set);
     progress(msg,i,opts.nImages,ticStart,1);
 end
 
 % Compute dataset-wide stats
 for m=1:numel(models)
-    [models{m}.stats.oidP,  models{m}.stats.oidR, ...
-     models{m}.stats.oidF,  models{m}.stats.oidT, ...
+    [models{m}.stats.odsP,  models{m}.stats.odsR, ...
+     models{m}.stats.odsF,  models{m}.stats.odsT, ...
      models{m}.stats.oisP,  models{m}.stats.oisR, ...
      models{m}.stats.oisF,  models{m}.stats.AP] = ...
         computeDatasetStats(models{m}.stats, opts);
     % Create field with dataset-specific stats
-    models{m}.(opts.dataset).(opts.set).stats = stats;
+    models{m}.(opts.dataset).(opts.set).stats = models{m}.stats;
     models{m}.(opts.dataset).(opts.set).opts = opts;
     models{m} = rmfield(models{m},'stats');
     % And store results
-    modelPath = fullfile(paths.sbpmil.models, models{m}.name);
+    modelPath = fullfile(paths.spbmil.models, models{m}.name);
     model = models{m}; save(modelPath, 'model')
 end
 
 % Plot precision-recall curves --------------------------------------------
-plotPrecisionRecall(0) 
+plotPrecisionRecall(models,opts.dataset,opts.set) 
+
+% -------------------------------------------------------------------------
+function spb = evaluateAMAT(img)
+% -------------------------------------------------------------------------
+img = imresize(img,0.5,'bilinear');
+img = L0Smoothing(img);
+mat = amat(img);
+spb = any(mat.axis,3); 
+spb = imresize(spb,2,'nearest');
 
 % -------------------------------------------------------------------------
 function spb = evaluateDeepSkel(model,img)
@@ -117,7 +134,6 @@ net.eval({'input',img});
 lout= net.getLayer(net.getLayerIndex('concat_fuse'));
 spb = net.vars(lout.outputIndexes);
 spb = 1-spb.value(:,:,1);
-
 
 % -------------------------------------------------------------------------
 function spb = evaluateModelMIL(model,img,histFeatures,iid,opts)
@@ -142,22 +158,21 @@ function ridges = evaluateLindeberg(im)
 % -------------------------------------------------------------------------
 [~,~,~,contours] = PS00___primal_sketch(double(rgb2gray(im)));
 ridges  = PSzz_unzip_contour(contours{1});
-%     figure; imshow(ridgesL,[]); title(['Lindeberg iid = ' num2str(iid)]);
 
 % -------------------------------------------------------------------------
-function axes = evaluateLevinshtein(model,im)
+function axes = evaluateLevinshtein(model,img)
 % -------------------------------------------------------------------------
 [parts, part_scales, part_score, image_data] = ...
     DetectSymmetricParts_SingleImage(fullfile(testImDir,testImages(i).name),...
     model.classifier_params,[], [], [], [], true);
 %     figure; DisplayParts(im, parts, part_scales, 1:size(parts,3));
 [part_labels, part_affinity, part_adjacency] = ...
-    GroupSymmetricParts_SingleImage(im, parts, model.part_classifier_params, image_data);
+    GroupSymmetricParts_SingleImage(img, parts, model.part_classifier_params, image_data);
 %     figure; DrawPartClustersEllipses(im, parts, part_labels);
 selected_parts_indicator = SelectSymmetricPart_SingleImage(parts, ...
     part_labels, part_score, part_affinity, part_adjacency,0.1);
 %     figure; DrawPartClustersEllipses(im, parts, part_labels, selected_parts_indicator);
-axes = levsym(im,parts, part_labels, selected_parts_indicator);
+axes = levsym(img,parts, part_labels, selected_parts_indicator);
 
 % -------------------------------------------------------------------------
 function [cntP,sumP,cntR,sumR,scores] = computeImageStats(pb,gt,opts)
@@ -225,7 +240,9 @@ F = fmeasure(P,R);
 [odsP,odsR,odsF,odsT] = findBestPRF(P,R,opts.thresh);
 
 % OIS scores (scalars)
-[~,indMaxF] = max(F,[],2);
+P = stats.cntP ./ max(eps, stats.sumP);
+R = stats.cntR ./ max(eps, stats.sumR);
+[~,indMaxF] = max(fmeasure(P,R),[],2);
 oisP = sum(stats.cntP(:,indMaxF)) ./ max(eps, sum(stats.sumP(:,indMaxF)));
 oisR = sum(stats.cntR(:,indMaxF)) ./ max(eps, sum(stats.sumR(:,indMaxF)));
 oisF = fmeasure(oisP,oisR);

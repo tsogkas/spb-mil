@@ -49,7 +49,7 @@ bestF = model.stats.odsF;
 
 % Plot P-R curve
 color = model2color(model);
-if ~strcmp(model.name,'levinstein')
+if ~strcmp(model.name,'levinstein') && ~strcmp(model.name,'amat')
     plot(P,R,[color '-'],'LineWidth',lineWidth);
 end
 % Add marker for best F-measure value
@@ -115,7 +115,7 @@ for m=1:numel(models)
     if ischar(models{m})
         if exist(models{m}, 'file')
             tmp = load(models{m});
-        elseif exist(fullfile(paths.models, models{m}), 'file')
+        elseif exist(fullfile(paths.spbmil.models, models{m}), 'file')
             tmp = load(fullfile(paths.models, models{m}));
         else
             error([models{m} ' was not found'])
@@ -124,7 +124,7 @@ for m=1:numel(models)
     end
     % Create convenient stats field for requested dataset and subset
     if isfield(models{m}, dataset) && isfield(models{m}.(dataset), set)
-        models{m}.stats = models{m}.(dataset).(set);
+        models{m}.stats = models{m}.(dataset).(set).stats;
     else
         error(['Model has not been evaluated on ' dataset ' ' set])
     end
