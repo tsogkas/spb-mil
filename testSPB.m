@@ -3,24 +3,25 @@ function models = testSPB(models, varargin)
 %   symmetry/ridge/medial axis detection algorithms.
 
 % Default testing options ------------------------------------------------
-opts = {'dataset',   'BMAX500',...
-        'set',       'val',...   % 'val' or 'test'
-        'visualize', false,...
-        'nThresh',   30,...      % #thresholds used for computing p-r
-        'maxDist',   0.01        % controls max distance of an accurately 
-       };                        % detected point from groundtruth.
+opts = {'dataset',     'BMAX500',...
+        'set',         'val',...   % 'val' or 'test'
+        'visualize',   false,...
+        'parpoolSize', feature('numcores'),... % set to 0 to run serially
+        'nThresh',     30,...      % #thresholds used for computing p-r
+        'maxDist',     0.01        % controls max distance of an accurately 
+       };                          % detected point from groundtruth.
 opts = parseVarargin(opts,varargin,'struct');
 
 % Read test images --------------------------------------------------------
 paths = setPaths();
 if ischar(opts.set) && strcmp(opts.set, 'val')
-    imPath    = fullfile(paths.bsds500im,'val');
-    gtPath    = fullfile(paths.symmax500,'val');
-    imageList = dir(fullfile(imPath, '*jpg'));
+    opts.imPath = fullfile(paths.bsds500im,'val');
+    opts.gtPath = fullfile(paths.symmax500,'val');
+    imageList = dir(fullfile(opts.imPath, '*jpg'));
 elseif ischar(opts.set) && strcmp(opts.set, 'test')
-    imPath    = fullfile(paths.bsds500im,'test');
-    gtPath    = fullfile(paths.symmax500,'test');
-    imageList = dir(fullfile(imPath, '*jpg'));
+    opts.imPath = fullfile(paths.bsds500im,'test');
+    opts.gtPath = fullfile(paths.symmax500,'test');
+    imageList = dir(fullfile(opts.imPath, '*jpg'));
 elseif isstruct(opts.set)
     disp('Data provided in struct form')
     imageList = opts.set;
@@ -30,71 +31,11 @@ elseif isstruct(opts.set)
 else
     error('set can be ''val'', ''test'', or a struct containing test data')
 end
-opts.nImages = numel(imageList);
-
-% Load models and initialize stats ----------------------------------------
-if ~iscell(models), models = {models}; end
-for m=1:numel(models)
-    switch lower(models{m})
-        case 'levinstein'
-            nThresh = 1;
-            models{m} = loadLevinsteinModel(models{m},paths);
-        case 'amat'
-            nThresh = 1;
-            models{m} = struct('name',models{m});
-        case 'lindeberg'
-            nThresh = opts.nThresh;
-            models{m} = struct('name',models{m});
-        otherwise % load MIL or CNN model
-            nThresh = opts.nThresh;
-            models{m} = loadModelFromMatFile(models{m},paths);
-    end
-    models{m}.stats.cntR = zeros(opts.nImages, nThresh);
-    models{m}.stats.sumR = zeros(opts.nImages, nThresh);
-    models{m}.stats.cntP = zeros(opts.nImages, nThresh);
-    models{m}.stats.sumP = zeros(opts.nImages, nThresh);
-    models{m}.stats.scores = zeros(opts.nImages, 4); % optimal P,R,F,T for each image
-end
 
 % Evaluate models on test images ------------------------------------------
-opts.thresh = linspace(1/(opts.nThresh+1),1-1/(opts.nThresh+1),opts.nThresh)';
-ticStart = tic;
-for i=1:1
-    if isfield(imageList(i), 'isdir')
-        % Load image and groundtruth data from disk
-        [~,iid,~] = fileparts(imageList(i).name);
-        gt  = load(fullfile(gtPath,['gt_' iid '.mat' ])); gt = gt.gt;
-        img = imread(fullfile(imPath,imageList(i).name));
-    else % Read image and groundtruth from struct
-        img = imageList(i).img;
-        gt  = imageList(i).pts;
-        iid = imageList(i).iid;
-    end
-    
-    clear features 
-    for m=1:numel(models)
-        switch models{m}.name
-            case 'levinstein'
-                spb = evaluateLevinshtein(models{m}, img);
-            case 'lindeberg'
-                spb = evaluateLindeberg(img);
-            case 'amat'
-                spb = evaluateAMAT(img);
-            case 'deepskel'
-                spb = evaluateDeepSkel(models{m},img);
-            otherwise % MIL 
-                % Compute features once for all MIL models
-                if ~exist('features','var')
-                    features = computeHistogramFeatures(img);
-                end
-                spb = evaluateModelMIL(models{m},img,features,iid,opts);
-        end
-        [models{m}.stats.cntP(i,:), models{m}.stats.sumP(i,:),...
-         models{m}.stats.cntR(i,:), models{m}.stats.sumR(i,:),...
-         models{m}.stats.scores(i,:)] = computeImageStats(spb,gt,opts);
-    end
-    msg = sprintf('Testing on BSDS500 %s set', opts.set);
-    progress(msg,i,opts.nImages,ticStart,1);
+if ~iscell(models), models = {models}; end
+for m=1:numel(models)
+    models{m} = evaluateModel(models{m},imageList,opts,paths);
 end
 
 % Compute dataset-wide stats
@@ -117,6 +58,73 @@ end
 plotPrecisionRecall(models,opts.dataset,opts.set) 
 
 % -------------------------------------------------------------------------
+function model = evaluateModel(model,imageList,opts,paths)
+% -------------------------------------------------------------------------
+% Load model
+opts.thresh = linspace(1/(opts.nThresh+1),1-1/(opts.nThresh+1),opts.nThresh)';
+switch lower(model)
+    case 'levinstein'
+        opts.thresh = 0.5; opts.nThresh = 1;
+        model = loadLevinsteinModel(model,paths);
+    case 'amat'
+        opts.thresh = 0.5; opts.nThresh = 1;
+        model = struct('name',model);
+    case 'lindeberg'        
+        model = struct('name',model);
+    otherwise % load MIL or CNN model
+        model = loadModelFromMatFile(model,paths);
+end
+
+% Initialize stats
+opts.nImages = numel(imageList);
+cntP = zeros(opts.nImages, opts.nThresh);
+cntR = zeros(opts.nImages, opts.nThresh);
+sumP = zeros(opts.nImages, opts.nThresh);
+sumR = zeros(opts.nImages, opts.nThresh);
+scores = zeros(opts.nImages, 4); % optimal P,R,F,T for each image
+
+modelName = lower(model.name);
+ticStart = tic;
+% parfor (i=1:opts.nImages, opts.parpoolSize)
+for i=1:opts.nImages % keep that just for debugging
+    if isfield(imageList(i), 'isdir')
+        % Load image and groundtruth data from disk
+        [~,iid,~] = fileparts(imageList(i).name);
+        gt  = load(fullfile(opts.gtPath,['gt_' iid '.mat' ])); gt = gt.gt;
+        img = imread(fullfile(opts.imPath,imageList(i).name));
+    else % Read image and groundtruth from struct
+        img = imageList(i).img;
+        gt  = imageList(i).pts;
+        iid = imageList(i).iid;
+    end
+    
+    switch modelName
+        case 'levinstein'
+            spb = evaluateLevinshtein(model, img);
+        case 'lindeberg'
+            spb = evaluateLindeberg(img);
+        case 'amat'
+            spb = evaluateAMAT(img);
+        case 'deepskel'
+            spb = evaluateDeepSkel(model,img);
+        otherwise % MIL
+            spb = evaluateModelMIL(model,img,iid,opts);
+    end
+    [cntP(i,:), sumP(i,:), cntR(i,:), sumR(i,:),scores(i,:)] = ...
+        computeImageStats(spb,gt,opts);
+    
+    msg = sprintf('Testing on %s %s set', opts.dataset, opts.set);
+    progress(msg,i,opts.nImages,ticStart,-1);
+end
+
+% Store stats in model struct
+model.stats.cntP = cntP;
+model.stats.sumP = sumP;
+model.stats.cntR = cntR;
+model.stats.sumR = sumR;
+model.stats.scores = scores;
+
+% -------------------------------------------------------------------------
 function spb = evaluateAMAT(img)
 % -------------------------------------------------------------------------
 [H,W,~] = size(img);
@@ -132,17 +140,18 @@ function spb = evaluateDeepSkel(model,img)
 net = model.net;
 img = bsxfun(@minus, single(img), reshape(net.meta.averageImage,1,1,[]));
 net.eval({'input',img});
-lout= net.getLayer(net.getLayerIndex('concat_fuse'));
+lout= net.getLayer(net.getLayerIndex('softmax'));
 spb = net.vars(lout.outputIndexes);
 spb = 1-spb.value(:,:,1);
 
 % -------------------------------------------------------------------------
-function spb = evaluateModelMIL(model,img,histFeatures,iid,opts)
+function spb = evaluateModelMIL(model,img,iid,opts)
 % -------------------------------------------------------------------------
 paths = setPaths();
 if strcmp(model.opts.featureSet, 'spectral')
     try
-        spectralFeat = load(fullfile(paths.spectral,'spectral_50',opts.set,['spectral_' iid '.mat']));
+        spectralFeat = load(fullfile(paths.spectral,'spectral_50',...
+            opts.set,['spectral_' iid '.mat']));
         spectralFeat = single(spectralFeat.spectral);
     catch
         warning('Was not able to load spectral feature')
@@ -151,7 +160,7 @@ else
     spectralFeat = [];
 end
 spb = spbMIL(img, 'featureSet',model.opts.featureSet, 'fineScale',true,...
-    'w',model.w, 'histFeatures', histFeatures, 'spectralFeature',spectralFeat);
+             'w',model.w, 'spectralFeature',spectralFeat);
 spb = spb.thin;
 
 % -------------------------------------------------------------------------
@@ -199,18 +208,17 @@ sumR = zeros(size(thresh));
 for t = 1:numel(thresh),
     % Threshold probability map and thin to 1-pixel width.
     bmap = (pb >= thresh(t));
-    bmap = bwmorph(bwmorph(bmap,'thin',Inf), 'clean');
+%     bmap = bwmorph(bwmorph(bmap,'thin',Inf), 'clean');
+    bmap = bwmorph(bmap,'thin',Inf);
     
     % Compute matches between symmetry map and all groundtruth maps
     accP = 0;
     for s=1:size(gt,3)
         [match1,match2] = correspondPixels(double(bmap),double(gt(:,:,s)),opts.maxDist);
-        if opts.visualize
-            plotMatch(1,bmap,gt(:,:,s),match1,match2);
-        end
+        if opts.visualize, plotMatch(1,bmap,gt(:,:,s),match1,match2); end
         % accumulate machine matches
         accP = accP | match1;
-        cntR(t) = nnz(match2>0); % tp (for recall)
+        cntR(t) = cntR(t) + nnz(match2>0); % tp (for recall)
     end
     cntP(t) = nnz(accP); % tp (for precision)
     sumP(t) = nnz(bmap); % tp + fp (for precision)

@@ -68,6 +68,7 @@ features.level  = pyramidLevel;
 features.dlc    = dlc;
 features.drc    = drc;
 features.dlr    = dlr;
+features.opts   = opts;
 
 % --- Compute histogram gradients at a single orientation and scale using
 % --- integral image representation for faster computation

@@ -13,7 +13,7 @@ function plotPrecisionRecall(models,dataset,set)
 % Stavros Tsogkas <tsogkas@cs.toronto.edu>
 % Last update: February 2017
 
-if nargin < 2, dataset = 'BSDS500'; end
+if nargin < 2, dataset = 'BMAX500'; end
 if nargin < 3, set = 'val'; end
 
 paths = setPaths();
@@ -30,7 +30,7 @@ end
 [~,inds] = sort(f,'descend');
 legend(hpr(inds), 'Location','SouthWest', txt(inds));
 mkdir(paths.spbmil.plots)
-print(h,'-depsc2',fullfile(paths.plots, 'pr'))
+print(h,'-depsc2',fullfile(paths.spbmil.plots, 'pr'))
 close(h)
 
 
@@ -94,9 +94,13 @@ if isfield(model,'opts') && isfield(model.opts, 'featureSet')
         case {'no-texture','no_texture'}
             c = 'k';
         case 'spectral' 
+            c = 'm';
     end
-else
-    % TODO: add handling of deepskeleton models
+elseif strcmpi(model.name, 'amat')
+    c = 'b';
+elseif strcmpi(model.name, 'deepskel')
+    c = 'r';
+else error('Unknown model type')
 end
 
 % -------------------------------------------------------------------------
@@ -104,8 +108,11 @@ function t = model2legend(model,f)
 % -------------------------------------------------------------------------
 if isfield(model,'opts') && isfield(model.opts, 'featureSet')
     t = sprintf('MIL-%s: F=%.2f', model.opts.featureSet, f);
-else
-    % TODO: add handling of deepskeleton models
+elseif strcmpi(model.name, 'amat')
+    t = sprintf('AMAT: F=%.2f', f);
+elseif strcmpi(model.name, 'deepskel')
+    t = sprintf('DeepSkel: F=%.2f', f);
+else error('Unknown model type')    
 end
 
 % -------------------------------------------------------------------------
