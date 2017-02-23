@@ -70,7 +70,7 @@ set(gca,'YTick',[0 .25 .5 .75]);
 set(gca,'XGrid','on');
 set(gca,'YGrid','on');
 xlabel('Recall'); ylabel('Precision');
-axis([0 .75 0 .75]); 
+axis([0 1 0 1]); 
 
 % Plot iso-contours
 [r_gt,p_gt] = meshgrid(0:0.01:1,0:0.01:1);
