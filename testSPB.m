@@ -113,7 +113,7 @@ for i=1:opts.nImages % keep that just for debugging
     [cntP(i,:), sumP(i,:), cntR(i,:), sumR(i,:),scores(i,:)] = ...
         computeImageStats(spb,gt,opts);
     
-    msg = sprintf('Testing on %s %s set', opts.dataset, opts.set);
+    msg = sprintf('Testing medial point detection on %s %s set. ', opts.dataset, opts.set);
     progress(msg,i,opts.nImages,ticStart,-1);
 end
 
