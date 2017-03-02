@@ -33,9 +33,10 @@ else
 end
 
 % Evaluate models on test images ------------------------------------------
+opts.thresh = linspace(1/(opts.nThresh+1),1-1/(opts.nThresh+1),opts.nThresh)';
 if ~iscell(models), models = {models}; end
 for m=1:numel(models)
-    models{m} = evaluateModel(models{m},imageList,opts,paths);
+    [models{m}, opts] = evaluateModel(models{m},imageList,opts,paths);
 end
 
 % Compute dataset-wide stats
@@ -61,7 +62,6 @@ plotPrecisionRecall(models,opts.dataset,opts.set)
 function model = evaluateModel(model,imageList,opts,paths)
 % -------------------------------------------------------------------------
 % Load model
-opts.thresh = linspace(1/(opts.nThresh+1),1-1/(opts.nThresh+1),opts.nThresh)';
 switch lower(model)
     case 'levinstein'
         opts.thresh = 0.5; opts.nThresh = 1;
