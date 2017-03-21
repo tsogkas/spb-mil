@@ -1,4 +1,4 @@
-function plotPrecisionRecall(models,dataset,set)
+function fig = plotPrecisionRecall(models,dataset,set)
 % PLOTPRECISIONRECALL Plot precision-recall curves and print figure. 
 % 
 %   PLOTPRECISIONRECALL(models) where models can be one of the following:
@@ -11,14 +11,14 @@ function plotPrecisionRecall(models,dataset,set)
 %   See also: testSPB
 % 
 % Stavros Tsogkas <tsogkas@cs.toronto.edu>
-% Last update: February 2017
+% Last update: March 2017 (added support for 'human' performance)
 
 if nargin < 2, dataset = 'BMAX500'; end
 if nargin < 3, set = 'val'; end
 
 paths = setPaths();
 models = loadModels(models, paths, dataset, set);
-h = setupFigure;
+fig = setupFigure;
 hpr = zeros(numel(models),1); % pr plot handles
 f   = zeros(numel(models),1); % best f-measure 
 txt = cell(numel(models),1);  % legend text 
@@ -28,17 +28,16 @@ end
 
 % Sort by f-score, create legend and print figure
 [~,inds] = sort(f,'descend');
-legend(hpr(inds), 'Location','SouthWest', txt(inds));
+legend(hpr(inds), 'Location','SouthWest', txt(inds)); 
 mkdir(paths.spbmil.plots)
-print(h,'-depsc2',fullfile(paths.spbmil.plots, 'pr'))
-close(h)
+export_fig('-transparent',fullfile(paths.spbmil.plots, 'pr.pdf'),fig)
 
 
 % -------------------------------------------------------------------------
 function [h, bestF, txt] = plotpr(model,lineWidth,markerSize)
 % -------------------------------------------------------------------------
-if nargin < 2, lineWidth  = 2; end
-if nargin < 3, markerSize = 8; end
+if nargin < 2, lineWidth  = 4; end
+if nargin < 3, markerSize = 16; end
 
 % Compute P,R,F
 P = sum(model.stats.cntP,1) ./ max(eps, sum(model.stats.sumP,1));
@@ -49,7 +48,7 @@ bestF = model.stats.odsF;
 
 % Plot P-R curve
 color = model2color(model);
-if ~strcmp(model.name,'levinstein') && ~strcmp(model.name,'amat')
+if ~ismember(model.name, {'levinstein','amat','human'})
     plot(P,R,[color '-'],'LineWidth',lineWidth);
 end
 % Add marker for best F-measure value
@@ -64,13 +63,13 @@ function h = setupFigure()
 % -------------------------------------------------------------------------
 h = figure; clf;
 hold on; box on; grid on;
-set(gca,'Fontsize',14);
-set(gca,'XTick',[0 .25 .5 .75]);
-set(gca,'YTick',[0 .25 .5 .75]);
+set(gca,'Fontsize',24);
+set(gca,'XTick',0:0.2:1);
+set(gca,'YTick',0:0.2:0.8);
 set(gca,'XGrid','on');
 set(gca,'YGrid','on');
 xlabel('Recall'); ylabel('Precision');
-axis([0 1 0 1]); 
+axis([0 1 0 0.8]); 
 
 % Plot iso-contours
 [r_gt,p_gt] = meshgrid(0:0.01:1,0:0.01:1);
@@ -96,10 +95,12 @@ if isfield(model,'opts') && isfield(model.opts, 'featureSet')
         case 'spectral' 
             c = 'm';
     end
+elseif strcmpi(model.name, 'human')
+    c = 'r';
 elseif strcmpi(model.name, 'amat')
     c = 'b';
 elseif strcmpi(model.name, 'deepskel')
-    c = 'r';
+    c = 'k';
 else error('Unknown model type')
 end
 
@@ -108,6 +109,8 @@ function t = model2legend(model,f)
 % -------------------------------------------------------------------------
 if isfield(model,'opts') && isfield(model.opts, 'featureSet')
     t = sprintf('MIL-%s: F=%.2f', model.opts.featureSet, f);
+elseif strcmpi(model.name, 'human')
+    t = sprintf('Human: F=%.2f', f);
 elseif strcmpi(model.name, 'amat')
     t = sprintf('AMAT: F=%.2f', f);
 elseif strcmpi(model.name, 'deepskel')
@@ -120,10 +123,15 @@ function models = loadModels(models,paths,dataset,set)
 % -------------------------------------------------------------------------
 for m=1:numel(models)
     if ischar(models{m})
-        if exist(models{m}, 'file')
+        if exist(models{m}, 'file') % absolute path
             tmp = load(models{m});
-        elseif exist(fullfile(paths.spbmil.models, models{m}), 'file')
+        elseif exist([models{m}, '.mat'],'file')
+            tmp = load([models{m}, '.mat']);
+        % partial path
+        elseif exist(fullfile(paths.spbmil.models, models{m}), 'file') 
             tmp = load(fullfile(paths.models, models{m}));
+        elseif exist(fullfile(paths.spbmil.models, [models{m} '.mat']), 'file')
+            tmp = load(fullfile(paths.models, [models{m} '.mat']));
         else
             error([models{m} ' was not found'])
         end

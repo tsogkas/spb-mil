@@ -60,7 +60,7 @@ if strcmp(featureSet, 'gray'), img = rgb2gray(img); end
 
 % Compute histogram features
 if isempty(prm('histFeatures'))  
-    histFeatures = computeHistogramFeatures(img,prm('fineScale'));
+    histFeatures = computeHistogramFeatures(img,'fine',prm('fineScale'));
 else
     histFeatures = prm('histFeatures');
 end

@@ -10,7 +10,7 @@ opts = {'dataset',     'BMAX500',...
         'nThresh',     30,...      % #thresholds used for computing p-r
         'maxDist',     0.01        % controls max distance of an accurately 
        };                          % detected point from groundtruth.
-opts = parseVarargin(opts,varargin,'struct');
+opts = parseVarargin(opts,varargin,'struct');Director of Partnerships, SCS
 
 % Read test images --------------------------------------------------------
 paths = setPaths();
@@ -36,7 +36,7 @@ end
 opts.thresh = linspace(1/(opts.nThresh+1),1-1/(opts.nThresh+1),opts.nThresh)';
 if ~iscell(models), models = {models}; end
 for m=1:numel(models)
-    [models{m}, opts] = evaluateModel(models{m},imageList,opts,paths);
+    models{m} = evaluateModel(models{m},imageList,opts,paths);
 end
 
 % Compute dataset-wide stats
@@ -51,7 +51,7 @@ for m=1:numel(models)
     models{m}.(opts.dataset).(opts.set).opts = opts;
     models{m} = rmfield(models{m},'stats');
     % And store results
-    modelPath = fullfile(paths.spbmil.models, models{m}.name);
+    modelPath = fullfile(paths.spbmil.models, [models{m}.name '.mat']);
     model = models{m}; save(modelPath, 'model')
 end
 
@@ -62,7 +62,11 @@ plotPrecisionRecall(models,opts.dataset,opts.set)
 function model = evaluateModel(model,imageList,opts,paths)
 % -------------------------------------------------------------------------
 % Load model
+% TODO: add code that loads 'human' and other models from file when it exists
 switch lower(model)
+    case 'human'
+        opts.thresh = 0.5; opts.nThresh = 1;
+        model = struct('name','human');
     case 'levinstein'
         opts.thresh = 0.5; opts.nThresh = 1;
         model = loadLevinsteinModel(model,paths);
@@ -76,6 +80,9 @@ switch lower(model)
 end
 
 % Initialize stats
+if isfield(model.(opts.dataset).(opts.set).stats)
+    model.stats = model.(opts.dataset).(opts.set).stats;
+end
 opts.nImages = numel(imageList);
 cntP = zeros(opts.nImages, opts.nThresh);
 cntR = zeros(opts.nImages, opts.nThresh);
@@ -85,11 +92,11 @@ scores = zeros(opts.nImages, 4); % optimal P,R,F,T for each image
 
 modelName = lower(model.name);
 ticStart = tic;
-% parfor (i=1:opts.nImages, opts.parpoolSize)
-for i=1:opts.nImages % keep that just for debugging
+parfor (i=1:opts.nImages, opts.parpoolSize)
+% for i=1:opts.nImages % keep that just for debugging
     if isfield(imageList(i), 'isdir')
         % Load image and groundtruth data from disk
-        [~,iid,~] = fileparts(imageList(i).name);
+        [~,iid] = fileparts(imageList(i).name);
         gt  = load(fullfile(opts.gtPath,['gt_' iid '.mat' ])); gt = gt.gt;
         img = imread(fullfile(opts.imPath,imageList(i).name));
     else % Read image and groundtruth from struct
@@ -99,17 +106,23 @@ for i=1:opts.nImages % keep that just for debugging
     end
     
     switch modelName
+        case 'human'
+            spb = gt;
         case 'levinstein'
             spb = evaluateLevinshtein(model, img);
         case 'lindeberg'
             spb = evaluateLindeberg(img);
         case 'amat'
-            spb = evaluateAMAT(img);
+            spb = evaluateAMAT(['bsds500-' imageList(i).iid '.jpg']);
+            if size(spb,1) ~= size(gt,1) || size(spb,2) ~= size(gt,2)
+                spb = imresize(spb,[size(gt,1),size(gt,2)],'nearest');
+            end
         case 'deepskel'
             spb = evaluateDeepSkel(model,img);
         otherwise % MIL
             spb = evaluateModelMIL(model,img,iid,opts);
     end
+
     [cntP(i,:), sumP(i,:), cntR(i,:), sumR(i,:),scores(i,:)] = ...
         computeImageStats(spb,gt,opts);
     
@@ -127,12 +140,11 @@ model.stats.scores = scores;
 % -------------------------------------------------------------------------
 function spb = evaluateAMAT(img)
 % -------------------------------------------------------------------------
-[H,W,~] = size(img);
-img = imresize(img,0.5,'bilinear');
-img = L0Smoothing(img);
 mat = amat(img);
+mat.branches = groupMedialPoints(mat);
+mat = refineMAT(mat);
 spb = any(mat.axis,3); 
-spb = imresize(spb,[H,W],'nearest');
+
 
 % -------------------------------------------------------------------------
 function spb = evaluateDeepSkel(model,img)
@@ -187,6 +199,11 @@ axes = levsym(img,parts, part_labels, selected_parts_indicator);
 % -------------------------------------------------------------------------
 function [cntP,sumP,cntR,sumR,scores] = computeImageStats(pb,gt,opts)
 % -------------------------------------------------------------------------
+if size(pb,3) > 1
+    [cntP,sumP,cntR,sumR,scores] = computeImageStatsHuman(gt,opts);
+    return
+end
+
 % For Levinstein's method we do not need to threshold
 if islogical(pb), 
     thresh = 0.5; pb = double(pb);
@@ -208,12 +225,12 @@ sumR = zeros(size(thresh));
 for t = 1:numel(thresh),
     % Threshold probability map and thin to 1-pixel width.
     bmap = (pb >= thresh(t));
-%     bmap = bwmorph(bwmorph(bmap,'thin',Inf), 'clean');
     bmap = bwmorph(bmap,'thin',Inf);
     
     % Compute matches between symmetry map and all groundtruth maps
     accP = 0;
     for s=1:size(gt,3)
+        gt(:,:,s) = bwmorph(gt(:,:,s), 'thin',inf);
         [match1,match2] = correspondPixels(double(bmap),double(gt(:,:,s)),opts.maxDist);
         if opts.visualize, plotMatch(1,bmap,gt(:,:,s),match1,match2); end
         % accumulate machine matches
@@ -226,6 +243,57 @@ for t = 1:numel(thresh),
 end
 
 % Compute precision (P), recall (R) and f-measure (F). 
+P = cntP ./ max(eps, sumP);
+R = cntR ./ max(eps, sumR);
+
+% Use linear interpolation to find best P,R,F combination.
+% scores contains the image-specific optimal P,R,F, after computing optimal
+% thresholds using linear interpolation.
+[bestP,bestR,bestF,bestT] = findBestPRF(P,R,thresh);
+scores = [bestP,bestR,bestF,bestT];
+
+% -------------------------------------------------------------------------
+function [cntP,sumP,cntR,sumR,scores] = computeImageStatsHuman(gt,opts)
+% -------------------------------------------------------------------------
+% Initialize
+thresh  = 0.5;
+numSegs = size(gt,3);
+cntP = zeros(numSegs,1);
+sumP = zeros(numSegs,1); 
+cntR = zeros(numSegs,1); 
+sumR = zeros(numSegs,1);
+
+% Compute numerator (cntX) and denominator (sumX) for precision and recall.
+% To compute human performance we compare one of the annotations at a time
+% against all remaining groundtruth maps.
+% First make sure all annotations are 1-pixel wide
+for t=1:numSegs
+    gt(:,:,t) = bwmorph(gt(:,:,t),'thin',inf);
+end
+
+% Now compare each gt annotation to all the other gt annotations
+indSegs = 1:numSegs;
+for t = 1:numSegs
+    gtc = gt(:,:,t);
+    gtr = gt(:,:,setdiff(indSegs,t));        
+    accP = 0;
+    for s=1:size(gtr,3)
+        [match1,match2] = correspondPixels(double(gtc),double(gtr(:,:,s)),opts.maxDist);
+        if opts.visualize, plotMatch(1,gtc,gtr(:,:,s),match1,match2); end
+        % accumulate machine matches
+        accP = accP | match1;
+        cntR(t) = cntR(t) + nnz(match2>0); % tp (for recall)
+    end
+    cntP(t) = nnz(accP); % tp (for precision)
+    sumP(t) = nnz(gtc);  % tp + fp (for precision)
+    sumR(t) = nnz(gtr);  % tp + fn (for recall)
+end
+
+% Compute precision (P), recall (R) and f-measure (F) for all subjects.
+cntP = sum(cntP);
+sumP = sum(sumP);
+cntR = sum(cntR);
+sumR = sum(sumR);
 P = cntP ./ max(eps, sumP);
 R = cntR ./ max(eps, sumR);
 
