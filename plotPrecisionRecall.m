@@ -29,7 +29,7 @@ end
 % Sort by f-score, create legend and print figure
 [~,inds] = sort(f,'descend');
 legend(hpr(inds), 'Location','SouthWest', txt(inds)); 
-mkdir(paths.spbmil.plots)
+if ~isdir(paths.spbmil.plots), mkdir(paths.spbmil.plots); end
 export_fig('-transparent',fullfile(paths.spbmil.plots, 'pr.pdf'),fig)
 
 

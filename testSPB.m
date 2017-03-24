@@ -51,6 +51,7 @@ for m=1:numel(models)
     models{m}.(opts.dataset).(opts.testSet).opts = opts;
     models{m} = rmfield(models{m},'stats');
     % And store results
+    if ~isdir(paths.spbmil.models), mkdir(paths.spbmil.models); end
     modelPath = fullfile(paths.spbmil.models, [models{m}.name '.mat']);
     model = models{m}; save(modelPath, 'model')
 end
