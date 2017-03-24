@@ -4,29 +4,29 @@ function models = testSPB(models, varargin)
 
 % Default testing options ------------------------------------------------
 opts = {'dataset',     'BMAX500',...
-        'set',         'val',...   % 'val' or 'test'
+        'testSet',     'val',...   % 'val' or 'test'
         'visualize',   false,...
         'parpoolSize', feature('numcores'),... % set to 0 to run serially
         'nThresh',     30,...      % #thresholds used for computing p-r
         'maxDist',     0.01        % controls max distance of an accurately 
        };                          % detected point from groundtruth.
-opts = parseVarargin(opts,varargin,'struct');Director of Partnerships, SCS
+opts = parseVarargin(opts,varargin,'struct');
 
 % Read test images --------------------------------------------------------
 paths = setPaths();
-if ischar(opts.set) && strcmp(opts.set, 'val')
+if ischar(opts.testSet) && strcmp(opts.testSet, 'val')
     opts.imPath = fullfile(paths.bsds500im,'val');
     opts.gtPath = fullfile(paths.symmax500,'val');
     imageList = dir(fullfile(opts.imPath, '*jpg'));
-elseif ischar(opts.set) && strcmp(opts.set, 'test')
+elseif ischar(opts.testSet) && strcmp(opts.testSet, 'test')
     opts.imPath = fullfile(paths.bsds500im,'test');
     opts.gtPath = fullfile(paths.symmax500,'test');
     imageList = dir(fullfile(opts.imPath, '*jpg'));
-elseif isstruct(opts.set)
+elseif isstruct(opts.testSet)
     disp('Data provided in struct form')
-    imageList = opts.set;
+    imageList = opts.testSet;
     if strcmp(opts.dataset, 'BMAX500')
-        if numel(imageList) == 100, opts.set = 'val'; else opts.set = 'test'; end
+        if numel(imageList) == 100, opts.testSet = 'val'; else opts.testSet = 'test'; end
     end
 else
     error('set can be ''val'', ''test'', or a struct containing test data')
@@ -47,8 +47,8 @@ for m=1:numel(models)
      models{m}.stats.oisF,  models{m}.stats.AP] = ...
         computeDatasetStats(models{m}.stats, opts);
     % Create field with dataset-specific stats
-    models{m}.(opts.dataset).(opts.set).stats = models{m}.stats;
-    models{m}.(opts.dataset).(opts.set).opts = opts;
+    models{m}.(opts.dataset).(opts.testSet).stats = models{m}.stats;
+    models{m}.(opts.dataset).(opts.testSet).opts = opts;
     models{m} = rmfield(models{m},'stats');
     % And store results
     modelPath = fullfile(paths.spbmil.models, [models{m}.name '.mat']);
@@ -56,7 +56,7 @@ for m=1:numel(models)
 end
 
 % Plot precision-recall curves --------------------------------------------
-plotPrecisionRecall(models,opts.dataset,opts.set) 
+plotPrecisionRecall(models,opts.dataset,opts.testSet) 
 
 % -------------------------------------------------------------------------
 function model = evaluateModel(model,imageList,opts,paths)
@@ -80,8 +80,8 @@ switch lower(model)
 end
 
 % Initialize stats
-if isfield(model.(opts.dataset).(opts.set).stats)
-    model.stats = model.(opts.dataset).(opts.set).stats;
+if isfield(model, opts.dataset) && isfield(model.(opts.dataset), opts.testSet)
+    model.stats = model.(opts.dataset).(opts.testSet).stats;
 end
 opts.nImages = numel(imageList);
 cntP = zeros(opts.nImages, opts.nThresh);
@@ -92,8 +92,8 @@ scores = zeros(opts.nImages, 4); % optimal P,R,F,T for each image
 
 modelName = lower(model.name);
 ticStart = tic;
-parfor (i=1:opts.nImages, opts.parpoolSize)
-% for i=1:opts.nImages % keep that just for debugging
+% parfor (i=1:opts.nImages, opts.parpoolSize)
+for i=1:opts.nImages % keep that just for debugging
     if isfield(imageList(i), 'isdir')
         % Load image and groundtruth data from disk
         [~,iid] = fileparts(imageList(i).name);
@@ -113,7 +113,7 @@ parfor (i=1:opts.nImages, opts.parpoolSize)
         case 'lindeberg'
             spb = evaluateLindeberg(img);
         case 'amat'
-            spb = evaluateAMAT(['bsds500-' imageList(i).iid '.jpg']);
+            spb = evaluateAMAT(img);
             if size(spb,1) ~= size(gt,1) || size(spb,2) ~= size(gt,2)
                 spb = imresize(spb,[size(gt,1),size(gt,2)],'nearest');
             end
@@ -126,7 +126,7 @@ parfor (i=1:opts.nImages, opts.parpoolSize)
     [cntP(i,:), sumP(i,:), cntR(i,:), sumR(i,:),scores(i,:)] = ...
         computeImageStats(spb,gt,opts);
     
-    msg = sprintf('Testing medial point detection on %s %s set. ', opts.dataset, opts.set);
+    msg = sprintf('Testing medial point detection on %s %s set. ', opts.dataset, opts.testSet);
     progress(msg,i,opts.nImages,ticStart,-1);
 end
 
@@ -140,9 +140,10 @@ model.stats.scores = scores;
 % -------------------------------------------------------------------------
 function spb = evaluateAMAT(img)
 % -------------------------------------------------------------------------
-mat = amat(img);
-mat.branches = groupMedialPoints(mat);
-mat = refineMAT(mat);
+smoothed = imresize(L0Smoothing(img),0.5);
+mat = AMAT(smoothed);
+mat.group;
+mat.simplify;
 spb = any(mat.axis,3); 
 
 
@@ -163,7 +164,7 @@ paths = setPaths();
 if strcmp(model.opts.featureSet, 'spectral')
     try
         spectralFeat = load(fullfile(paths.spectral,'spectral_50',...
-            opts.set,['spectral_' iid '.mat']));
+            opts.testSet,['spectral_' iid '.mat']));
         spectralFeat = single(spectralFeat.spectral);
     catch
         warning('Was not able to load spectral feature')
