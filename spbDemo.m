@@ -1,47 +1,41 @@
-%% This demo demonstrates the use of rpb ridge detector 
+%% Demonstrates the use of the spbMIL symmetry detector 
 
-%% Add directories to path and read image
-rootFolder = 'symmetry';
-addpath(genpath(rootFolder));   % add necessary directories to path
-im = double(imread('101087.jpg'))/255;  % read input image
-% (im the berkeley segbench code is included in your path, you can use
-% im = imgRead(image_iid) instead
+img = im2double(imread('101087.jpg'));  % read input image
 
-%% Straightforward use of rpb function
+%% Straightforward use of spbMIL
 
-[sup,pfat] = rpb(im);           % run detector
-% [sup,pfat] = rpb(im,'color'); % same as previous command
-% [sup,pfat] = rpb(im,'gray');  % run detector using only brightness
+spb = spbMIL(img); % run detector using "color" set of features
+% spb = spbMIL(img,'featureSet','color'); % same as previous command
+% spb = spbMIL(img,'featureSet','gray');  % run detector using only brightness features
 
 %% Multiple tests on one image
 % If you want to make multiple tests on the same image, avoid extracting 
 % features all the time, by calculating them once and passing them as an
 % argument to the rpb function.
 
-% [dlc,drc,dlr] = histGradFeatures(im);
-% [sup,pfat] = rpb(im,'color',[],0,dlc,drc,dlr);          
+histFeatures = computeHistogramFeatures(img);
+spb = spbMIL(img,'histFeatures', histFeatures);          
 
-%% Use rpb to return feature array
-% You can use rpb to return only the multidimensional array of concatenated
-% features, avoiding the cost of evaluating the rpb response.
+%% spb fields
+% The output of spbMIL contains various useful fields:
+% spb.fat:        symmetry probability map (before nonmax suppresion)
+% spb.thin:       thinned symmetry probability map
+% spb.orientMap:  dense orientation map of symmetry responses
 
-% [~,~,~,f] = rpb(im,'color',[],1,dlc,drc,dlr);
-
-%% Use rpb to test with a new beta vector instead of the learned ones
-% You can use rpb with a new beta vector as input
-
-% [sup,pfat] = rpb(im,'color',newBeta,0);          
+%% Use spbMIL to test with a new weight vector 
+% model = trainMIL(...)
+% spb = spbMIL(img,'w',newWeights);          
 
 %% Using spectral feature
-% If you have pre-calculated the spectral feature for symmetry, you can use
-% it as an additional parameter.
+% If you have pre-calculated the spectral feature for symmetry, you can do:
 
-% [sup,pfat] = rpb(im,'spectral',[],0,dlc,drc,dlr,spectralFeatureArray);          
+% tmp = load(spfeatPath); spfeat = tmp.spectral;
+% spb = spbMIL(img,'spectralFeature',spectral);          
 
 %% Visualizing results
 
-figure(1), imshow(im);      title('Input image')
-figure(2), imshow(pfat);    title('Responses before non-maximum suppression')
-figure(3), imshow(sup);     title('rpb (after non-maximum suppression)')
-figure(4), imshow(sup>0.5); title('rpb (thresholded)')
+figure(1), imshow(img);             title('Input image')
+figure(2), imshow(spb.pfat);        title('Symmetry probability map')
+figure(3), imshow(spb.thin);        title('Spb after non-maximum suppression')
+figure(4), imshow(spb.thin>0.5);    title('spb thresholded')
 

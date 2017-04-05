@@ -18,6 +18,7 @@ if ischar(opts.testSet) && strcmp(opts.testSet, 'val')
     opts.imPath = fullfile(paths.bsds500im,'val');
     opts.gtPath = fullfile(paths.symmax500,'val');
     imageList = dir(fullfile(opts.imPath, '*jpg'));
+    opts.dataset.
 elseif ischar(opts.testSet) && strcmp(opts.testSet, 'test')
     opts.imPath = fullfile(paths.bsds500im,'test');
     opts.gtPath = fullfile(paths.symmax500,'test');
