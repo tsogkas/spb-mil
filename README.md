@@ -24,7 +24,7 @@ This code is released under the MIT License (refer to the LICENSE file for detai
 * Linux OS (tested on 16.04).
 * A recent version of MATLAB. All our experiments were performed using MATLAB R2016a but previous versions of our
 code have been successfully tested on MATLAB R2009b-R2011b.
-* All mex-files and third-party code are already included.
+* [`matlab-utils`](https://github.com/tsogkas/matlab-utils).
 
 ## Requirements: hardware
 
@@ -44,10 +44,11 @@ Feel free to change the paths in `setPaths.m` and use symbolic links to change d
 ## Setup
 
 1. Clone the `spb-mil` repository: `git clone git@github.com:tsogkas/spb-mil.git`
-2. Create folders `output/`, `data/`.
-3. Download the BSDS300 [images](http://www.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/BSDS300-images.tgz) and [human annotations](http://www.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/BSDS300-human.tgz)
+2. Clone the `matlab-utils` repository: `git clone git@github.com:tsogkas/matlab-utils.git`
+3. Create folders `output/`, `data/`.
+4. Download the BSDS300 [images](http://www.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/BSDS300-images.tgz) and [human annotations](http://www.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/BSDS300-human.tgz)
 and add them in `data/BSDS300`. If you want to use the newer version of the dataset, you can download the [BSDS500](http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/BSR/BSR_bsds500.tgz) dataset and benchmark code and extract it in `data/`. 
-4. Download the [SYMMAX300](http://tsogkas.github.io/publications/symmetry-mil/SYMMAX300.zip) dataset.
+5. Download the [SYMMAX300](http://tsogkas.github.io/publications/symmetry-mil/SYMMAX300.zip) dataset.
 
 *NOTE: Please edit the `setPaths` function accordingly so that the paths reflect your directory structure.*
 
