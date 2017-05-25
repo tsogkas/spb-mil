@@ -43,8 +43,8 @@ Feel free to change the paths in `setPaths.m` and use symbolic links to change d
 
 ## Setup
 
-1. Clone the `spb-mil` repository: `git clone git@github.com:tsogkas/spb-mil.git`
-2. Clone the `matlab-utils` repository: `git clone git@github.com:tsogkas/matlab-utils.git`
+1. Clone the `spb-mil` repository: `git clone git@github.com:tsogkas/spb-mil.git` and add `cpp`, `external` and `util` to your working path.
+2. Clone the `matlab-utils` repository: `git clone git@github.com:tsogkas/matlab-utils.git` and add it to your working path.
 3. Create folders `output/`, `data/`.
 4. Download the BSDS300 [images](http://www.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/BSDS300-images.tgz) and [human annotations](http://www.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/BSDS300-human.tgz)
 and add them in `data/BSDS300`. If you want to use the newer version of the dataset, you can download the [BSDS500](http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/BSR/BSR_bsds500.tgz) dataset and benchmark code and extract it in `data/`. 
