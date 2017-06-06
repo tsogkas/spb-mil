@@ -48,7 +48,7 @@ bestF = model.stats.odsF;
 
 % Plot P-R curve
 color = model2color(model);
-if ~ismember(model.name, {'levinstein','amat','human'})
+if ~ismember(model.name, {'levinstein','amat','human','ucm'})
     plot(P,R,[color '-'],'LineWidth',lineWidth);
 end
 % Add marker for best F-measure value
@@ -99,8 +99,10 @@ elseif strcmpi(model.name, 'human')
     c = 'r';
 elseif strcmpi(model.name, 'amat')
     c = 'b';
-elseif strcmpi(model.name, 'deepskel')
+elseif strcmpi(model.name, 'horse_it14k') || strcmpi(model.name, 'sk506_it14k')
     c = 'k';
+elseif strcmpi(model.name, 'ucm')
+    c = 'g';
 else error('Unknown model type')
 end
 
@@ -113,8 +115,10 @@ elseif strcmpi(model.name, 'human')
     t = sprintf('Human: F=%.2f', f);
 elseif strcmpi(model.name, 'amat')
     t = sprintf('AMAT: F=%.2f', f);
-elseif strcmpi(model.name, 'deepskel')
-    t = sprintf('DeepSkel: F=%.2f', f);
+elseif strcmpi(model.name, 'horse_it14k') || strcmpi(model.name, 'sk506_it14k')
+    t = sprintf('FSDS: F=%.2f', f);
+elseif strcmpi(model.name, 'ucm')
+    t = sprintf('UCM: F=%.2f', f);
 else error('Unknown model type')    
 end
 
