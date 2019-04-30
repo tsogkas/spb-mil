@@ -9,7 +9,7 @@ opts = {'dataset',     'BMAX500',...
         'parpoolSize', feature('numcores'),... % set to 0 to run serially
         'nThresh',     30,...      % #thresholds used for computing p-r
         'maxDist',     0.01,...    % controls max distance of an accurately detected point from groundtruth.
-        'amatws',      1e-4,...    % controls amat coarsenesskai to live
+        'amatws',      1e-4,...    % controls amat coarseness
         'ucmthresh',   0.5
        };                          
 opts = parseVarargin(opts,varargin,'struct');
@@ -74,10 +74,10 @@ plotPrecisionRecall(models,opts.dataset,opts.testSet)
 function model = evaluateModel(model,imageList,opts,paths)
 % -------------------------------------------------------------------------
 % Load model
-if ischar(model)
+if ischar(model) % "model" is the the path to the mat file containing the model
     [~,modelName] = fileparts(model);
     if exist(fullfile(paths.spbmil.models, [modelName '.mat']), 'file')
-        model = load(fullfile(paths.spbmil.models, [modelName '.mat'])); 
+        model = load(fullfile(paths.spbmil.models, [modelName '.mat']));
         model = model.model;
     end
 else
@@ -109,7 +109,7 @@ scores = zeros(opts.nImages, 4); % optimal P,R,F,T for each image
 modelName = lower(model.name);
 ticStart = tic;
 % parfor (i=1:opts.nImages, opts.parpoolSize)
-for i=47:opts.nImages % keep that just for debugging
+for i=1:opts.nImages % keep that just for debugging
     [img,gt,iid,fgmask] = loadImageGroundtruth(imageList,i,opts);
     switch modelName
         case 'human'
